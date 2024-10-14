@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-reviews
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-reviews
+  template:
+    metadata:
+      labels:
+        app: user-reviews
+    spec:
+      containers:
+      - name: user-reviews
+        image: 307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews
+        ports:
+        - containerPort: 8080
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-reviews
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: user-reviews
