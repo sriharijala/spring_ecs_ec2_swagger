@@ -88,13 +88,16 @@ jobs:
         run: |
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push ${{env.ECR_REGISTRY}}/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to EKS
+        env:
+          ECR_REPOSITORY: sjala/user-reviews
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           aws eks update-kubeconfig --region $REGION --name my-eks-cluster
           mkdir -p k8s
-          export ECR_REPOSITORY_URL="$ECR_REGISTRY/sjala/user_reviews:${GITHUB_SHA}"
+          export ECR_REPOSITORY_URL="${{env.ECR_REGISTRY}}/$ECR_REPOSITORY:$IMAGE_TAG"
           envsubst < k8s-deployment.yaml > k8s/k8s-deployment.yaml
           echo "resources:" > k8s/kustomization.yaml
           echo "- k8s-deployment.yaml" >> k8s/kustomization.yaml
