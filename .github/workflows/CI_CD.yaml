@@ -117,9 +117,10 @@ jobs:
           echo "- k8s-deployment.yaml" >> k8s/kustomization.yaml
           kubectl kustomize k8s | kubectl apply -f - --force
 
-      - name: Deploy Kubernest Dashboard
-        run: |
-          helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-          kubectl create ns kubernetes-dashboard
-          helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --namespace kubernetes-dashboard --version "7.4.0"
- 
+
+      #- name: Deploy Kubernest Dashboard
+      #  run: |
+      #    helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+      #   kubectl create ns kubernetes-dashboard
+      #   helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --namespace kubernetes-dashboard --version "7.4.0"
+        
