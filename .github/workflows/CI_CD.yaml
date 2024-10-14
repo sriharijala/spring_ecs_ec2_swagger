@@ -56,8 +56,20 @@ jobs:
           name: app-jar
           path: target
 
+      - name: Get commit hash
+        id: get-commit-hash
+        run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
+  
+      - name: Get timestamp
+        id: get-timestamp
+        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
+
+      - name: Get Image Tag
+        id: get-imagetag
+        run: echo "::set-output name=imagetag::${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}"
+  
       - name: Build Docker image
-        run: docker build -t sjala/user_reviews:latest .
+        run: docker build -t sjala/user_reviews:${{ steps.get-imagetag.outputs.imagetag}} .
 
       - name: Install and configure AWS CLI
         uses: unfor19/install-aws-cli-action@v1
@@ -80,19 +92,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Get commit hash
-        id: get-commit-hash
-        run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
-  
-      - name: Get timestamp
-        id: get-timestamp
-        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
-
-      - name: Get Image Tag
-        id: get-imagetag
-        run: echo "::set-output name=imagetag::${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}"
-       
+     
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
         env:
