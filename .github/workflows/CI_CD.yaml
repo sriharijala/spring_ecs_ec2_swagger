@@ -57,7 +57,7 @@ jobs:
           path: target
 
       - name: Build Docker image
-        run: docker build -t $ECR/sjala/user_reviews .
+        run: docker build -t $ECR/sjala/user_reviews:latest .
 
       - name: Install and configure AWS CLI
         run: |
