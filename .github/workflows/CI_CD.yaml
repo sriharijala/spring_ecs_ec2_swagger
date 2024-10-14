@@ -57,7 +57,7 @@ jobs:
           path: target
 
       - name: Build Docker image
-        run: docker build -t $ECR/user_reviews .
+        run: docker build -t $ECR/sjala/user_reviews .
 
       - name: Install and configure AWS CLI
         run: |
@@ -74,14 +74,14 @@ jobs:
 
       - name: Tag and push Docker image
         run: |
-          docker tag $ECR/user_reviews:latest $ECR/user_reviews:${GITHUB_SHA}
-          docker push $ECR/user_reviews:${GITHUB_SHA}
+          docker tag $ECR/sjala/user_reviews:latest $ECR/sjala/user_reviews:${GITHUB_SHA}
+          docker push $ECR/jala/user_reviews:${GITHUB_SHA}
 
       - name: Deploy to EKS
         run: |
           aws eks update-kubeconfig --region $REGION --name my-eks-cluster
           mkdir -p k8s
-          export ECR_REPOSITORY_URL="$ECR/user_reviews:${GITHUB_SHA}"
+          export ECR_REPOSITORY_URL="$ECR/sjala/user_reviews:${GITHUB_SHA}"
           envsubst < k8s-deployment.yaml > k8s/k8s-deployment.yaml
           echo "resources:" > k8s/kustomization.yaml
           echo "- k8s-deployment.yaml" >> k8s/kustomization.yaml
