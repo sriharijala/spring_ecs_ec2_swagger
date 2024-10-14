@@ -87,7 +87,7 @@ jobs:
           REPOSITORY: sjala/user_reviews
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker tag sjala/user-reviews:$IMAGE_TAG $ECR/sjala/user-reviews:$IMAGE_TAG
+          docker tag $IMAGE_TAG $ECR/sjala/user-reviews:$IMAGE_TAG
           docker push $ECR/sjala/user_reviews:$IMAGE_TAG
 
       - name: Deploy to EKS
