@@ -60,14 +60,18 @@ jobs:
         run: docker build -t sjala/user_reviews:latest .
 
       - name: Install and configure AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2                         # default
+          verbose: false                     # default
+          arch: amd64                        # allowed values: amd64, arm64
+          bindir: "/usr/local/bin"           # default
+          installrootdir: "/usr/local"       # default
+          rootdir: ""                        # defaults to "PWD"
+          workdir: ""                        # defaults to "PWD/unfor19-awscli"  
+
+      - name: Install and configure AWS CLI
         run: |
-          #curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          #unzip -q awscliv2.zip
-          curl -L -o install-aws.sh https://raw.githubusercontent.com/unfor19/install-aws-cli-action/master/entrypoint.sh && \
-          chmod +x install-aws.sh
-          ./install-aws.sh "v2" "amd64"
-          rm install-aws.sh           
-          sudo ./aws/install --update
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set default.region $REGION
