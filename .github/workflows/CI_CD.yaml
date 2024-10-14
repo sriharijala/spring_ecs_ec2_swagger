@@ -109,7 +109,7 @@ jobs:
           ECR_REPOSITORY: sjala/user-reviews
           IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
         run: |
-          aws eks update-kubeconfig --region $REGION --name user-reviews
+          aws eks update-kubeconfig --region us-east-1 --name user-reviews
           mkdir -p k8s
           export ECR_REPOSITORY_URL="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           envsubst < k8s-deployment.yaml > k8s/k8s-deployment.yaml
