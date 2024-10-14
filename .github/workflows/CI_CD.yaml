@@ -77,9 +77,9 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID  }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Login to ECR
-        run: |
-          aws ecr get-login-password --region $REGION | docker login --username srihari.jala3@gmail.com --password-stdin $ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Tag and push Docker image
         run: |
