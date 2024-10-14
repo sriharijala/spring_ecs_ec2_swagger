@@ -88,25 +88,30 @@ jobs:
       - name: Get timestamp
         id: get-timestamp
         run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
-          
+
+      - name: Get Image Tag
+        id: get-imagetag
+        run: echo "::set-output name=imagetag::${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}"
+       
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
         env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             ECR_REPOSITORY:  sjala/user-reviews
-            IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
+            IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           
       - name: Deploy to EKS
         env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: sjala/user-reviews
-          IMAGE_TAG: latest #${{ github.sha }}
+          IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
         run: |
           aws eks update-kubeconfig --region $REGION --name my-eks-cluster
           mkdir -p k8s
-          export ECR_REPOSITORY_URL="${{env.ECR_REGISTRY}}/$ECR_REPOSITORY:$IMAGE_TAG"
+          export ECR_REPOSITORY_URL="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           envsubst < k8s-deployment.yaml > k8s/k8s-deployment.yaml
           echo "resources:" > k8s/kustomization.yaml
           echo "- k8s-deployment.yaml" >> k8s/kustomization.yaml
