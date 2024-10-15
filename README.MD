@@ -173,13 +173,14 @@ ECS Conatiner login
 
 ### ECS Clusters Commands
 - List ECS Clsuters: aws ecs list-clusters
-- List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:307946673854:cluster/review-cluster"
-- List tasks: aws ecs list-tasks --cluster review-cluster
--Login to conatiner: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
+- List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:307946673854:cluster/user-reviews"
+- List tasks: aws ecs list-tasks --cluster user-reviews
+- Login to conatiner: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
 
 ### MySQL
  - Login to MySQL from EC2 Insatnce : mysql -usjala -pJalaJala123 -hsocialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com -P3306
  - Change schema: use schemaname
  - List all users: select User,Host from mysql.user;
+ - Grant access to user from any host: ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
 
 aws ecs execute-command --cluster review-cluster --task 77063c453c9c4feb89b085a1a6988b28 --container review-app --interactive --command "/bin/bash"

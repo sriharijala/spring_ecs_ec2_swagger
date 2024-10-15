@@ -101,9 +101,8 @@ resource "aws_route_table_association" "private" {
 }
 
 # --- ECS Cluster ---
-
 resource "aws_ecs_cluster" "main" {
-  name = "${var.project}-cluster"
+  name = "${var.project}"
 }
 
 # --- ECS Node Role ---
@@ -480,7 +479,7 @@ resource "aws_db_subnet_group" "rds_subnet" {
   depends_on = [ aws_subnet.private ]
   tags       = { Name = "${var.project}-rds_subnet" }
   name       = "${var.project}-rds-subnet-group"
-  subnet_ids = [aws_subnet.private[0].id, aws_subnet.private[1].id]
+  subnet_ids = [aws_subnet.private[0].id, aws_subnet.private[1].id, aws_subnet.public[0].id, aws_subnet.public[1].id]
 }
 
 resource "aws_iam_role" "rds_monitoring_role" {
@@ -541,6 +540,21 @@ resource "aws_db_instance" "mysql" {
   
 
 }
+
+
+#--- Set up DB ---
+data "local_file" "sql_script" {
+  filename = "${path.module}/init/db_structure.sql"
+}
+
+/*
+resource "null_resource" "db_setup" {
+  depends_on = [aws_db_instance.mysql, aws_security_group.rds_sg]
+  provisioner "local-exec" {
+    command = "mysql --host=${aws_db_instance.mysql.address} --port=${aws_db_instance.mysql.port} --user=sjala --password=${var.database_password} --database=${var.database_name} < ${data.local_file.sql_script.content}"
+  }
+}
+*/
 
 
 # --- ALB ---
@@ -621,6 +635,12 @@ output "app_repo_url" {
 output "mysql_db_url" {
   value = aws_db_instance.mysql.endpoint
 }
+
+output "db_init_file_path" {
+  value = data.local_file.sql_script.filename
+}
+
+
 
 /* TO DO outside 
 Let’s run terraform apply again. We should see output with repository URL in AWS. Now push user-reviews to ECR.

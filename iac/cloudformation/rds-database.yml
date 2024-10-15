@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Script to create a mysql database
+
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - Label: 
+          default: Network Configuration
+        Parameters:
+          - VPCRef
+          - SubnetRefList
+          - DbSubnetGroupName
+          - DbSubnetGroupDescription
+          - SecurityGroupName
+          - SecurityGroupDescription
+      - Label:
+          default: Database Configuration
+        Parameters:
+          - DbInstanceIdentifier
+          - DbName
+          - DbUserName
+          - DbPassword
+          
+    ParameterLabels:
+      VPCRef:
+        default: VPC Reference
+      SubnetRefList:
+        default: Subnet Reference List
+      DbSubnetGroupName:
+        default: Database Subnet Group Name
+      DbSubnetGroupDescription:
+        default: Database Subnet Group Description
+      SecurityGroupName:
+        default: Security Group Name
+      SecurityGroupDescription:
+        default: Security Group Description
+      DbInstanceIdentifier:
+        default: Database Instance Identifier
+      DbName:
+        default: Database Name
+      DbUserName:
+        default: Database Username
+      DbPassword:
+        default: Database Password
+
+Parameters:
+  VPCRef:
+    Type: AWS::EC2::VPC::Id
+    Description: Enter a VPC reference.
+
+  SubnetRefList:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Enter the private subnet reference list.
+
+  DbSubnetGroupName:
+    Type: String
+    Default: ch-dev-database-subnet-group
+    Description: Enter a database subnet group name.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Database subnet group name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+  
+  DbSubnetGroupDescription:
+    Type: String
+    Description: Enter a database subnet group description.
+    Default: ch-dev-database-subnet-group description
+
+  SecurityGroupName:
+    Type: String
+    Description: Enter a security group name for the database.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Security group name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    Default: ch-dev-database-security-group
+
+  SecurityGroupDescription:
+    Type: String
+    Description: Enter a security group description.
+    Default: ch-dev-database-security-group description
+
+  DbInstanceIdentifier:
+    Type: String
+    Default: socialmedia
+    Description: Enter a database instance identifier.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Database instance identifiercan can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+
+  DbName:
+    Type: String
+    Default: socialmedia
+    Description: Enter a database name.
+    AllowedPattern: ^[a-zA-Z0-9]*$
+    ConstraintDescription: Database Name must begin with a letter and contain only alphanumeric characters.
+
+  DbUserName:
+    Type: String
+    Default: sjala
+    Description: The database admin account username
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+
+  DbPassword:
+    Type: String
+    Default: JalaJala123
+    NoEcho: true
+    Description: The database admin account password
+    MinLength: 6
+    MaxLength: 41
+
+Resources:
+
+  DBSubnetGroup: 
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName:
+        Ref: DbSubnetGroupName
+      DBSubnetGroupDescription:
+        Ref: DbSubnetGroupDescription
+      SubnetIds: 
+        Ref: SubnetRefList
+
+  DBEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:
+        Ref: SecurityGroupDescription
+      GroupName:
+        Ref: SecurityGroupName
+      VpcId:
+        Ref: VPCRef
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '3306'
+        ToPort: '3306'
+        CidrIp: 10.0.0.0/16
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 10.0.0.0/16
+  
+  MysqlDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier:
+        Ref: DbInstanceIdentifier
+      DBName: 
+        Ref: DbName
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      Engine: MySQL
+      EngineVersion: 8.0.37
+      MultiAZ: false
+      PubliclyAccessible: false
+      MasterUsername:
+        Ref: DbUserName
+      MasterUserPassword: 
+        Ref: DbPassword
+      VPCSecurityGroups: 
+      - !GetAtt DBEC2SecurityGroup.GroupId
+      DBSubnetGroupName:
+        Ref: DBSubnetGroup

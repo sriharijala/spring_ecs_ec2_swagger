@@ -1,0 +1,289 @@
+AWSTemplateFormatVersion: 2010-09-09 
+Description: Script to create a ecs stack with loadbalancer
+
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - Label: 
+          default: Network Configuration
+        Parameters:
+          - VPCRef
+          - SubnetRefList
+          - SecurityGroupVPCRef
+          - SecurityGroupName
+          - SecurityGroupDescription
+      - Label:
+          default: ECS Configuration
+        Parameters:
+            - ECSClusterName
+            - ExecutionRoleName
+            - RepositoryName
+            - TaskdefinitionFamily
+            - ContainerAppName
+            - ECSServiceName
+            - LogGroupName
+      - Label:
+          default: LoadBalancer Configuration
+        Parameters:
+          - TargetGroupName
+          
+    ParameterLabels:
+      VPCRef:
+        default: VPC Reference
+      SubnetRefList:
+        default: Subnet Reference List
+      SecurityGroupVPCRef:
+        default: VPC security group Reference
+      SecurityGroupName:
+        default: Security Group Name
+      SecurityGroupDescription:
+        default: Security Group Description
+      ECSClusterName:
+        default: ECS Cluster Name
+      ExecutionRoleName:
+        default: Execution Role Name
+      RepositoryName:
+        default: Repository Name
+      TaskdefinitionFamily:
+        default: Taskdefinition Family
+      ContainerAppName:
+        default: Container App Name
+      ECSServiceName:
+        default: ECS Service Name
+      LogGroupName:
+        default: Log Group Name
+      TargetGroupName:
+        default: Target Group Name
+
+Parameters:
+  VPCRef:
+    Type: AWS::EC2::VPC::Id
+    Description: Enter a VPC reference.
+
+  SubnetRefList:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Enter the subnet reference list.
+
+  SecurityGroupVPCRef:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Enter the VPC security group reference.
+
+  SecurityGroupName:
+    Type: String
+    Default: ch-dev-ecs-security-group
+    Description: Enter a security group name for the ECS.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Security group name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+  
+  SecurityGroupDescription:
+    Type: String
+    Description: Enter a security group description.
+
+  RepositoryName:
+    Type: String
+    Default: sjala/user-reviews
+    Description: Enter a repository name.
+    #AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    #ConstraintDescription: Repository name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+
+  LogGroupName:
+    Type: String
+    Default: ch-dev-log-group
+    Description: Enter a log group name.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Log group name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+
+  TaskdefinitionFamily:
+    Type: String
+    Default: ch-dev-user-api-taskdefinition
+    Description: Enter a taskdefinition family.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Taskdefinition family can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+
+  ContainerAppName:
+    Type: String
+    Default: user-reviews
+    Description: Enter a container app name.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Container app name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+
+  TargetGroupName:
+    Type: String
+    Default: ch-dev-user-api-target-group
+    Description: Enter a target group name.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Target group name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+
+  ECSServiceName:
+    Type: String
+    Default: user-reviews-service
+    Description: Enter a ECS service name.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: ECS Service name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+  
+  ECSClusterName:
+    Type: String
+    Default: user-reviews
+    Description: Enter a ECS Cluster name.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Cluster name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
+
+  ExecutionRoleName:
+    Type: String
+    Default: ecsTaskExecutionRole
+    Description: Enter a Execution Role Name.
+
+Resources:
+
+  LogGroup: 
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Ref: LogGroupName
+      RetentionInDays: 1
+
+  Taskdefinition: 
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: 
+        Ref: TaskdefinitionFamily
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 512
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${ExecutionRoleName}"
+      ContainerDefinitions:
+        - Name:
+            Ref: ContainerAppName
+          Cpu: 256
+          Memory: 512
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${RepositoryName}:60a02ee-2024-10-15-15-58"
+          Essential: true
+          Environment:
+            - Name: SERVER_PORT
+              Value: 8080
+            - Name: MANAGEMENT_SERVER_PORT
+              Value: 8081
+          Secrets:
+            - Name: SPRING_DATASOURCE_URL
+              valueFrom: ch-dev-user-db-url
+            - Name: SPRING_DATASOURCE_USERNAME
+              valueFrom: ch-dev-user-db-username
+            - Name: SPRING_DATASOURCE_PASSWORD
+              valueFrom: ch-dev-user-db-password
+          PortMappings:
+            - ContainerPort: 8080
+              HostPort: 8080
+            - ContainerPort: 8081
+              HostPort: 8081
+          HealthCheck:
+            Command:
+              - "CMD-SHELL"
+              - "curl -f http://localhost:8081/actuator/health || exit 1"
+            Interval: 30
+            StartPeriod: 60
+          LogConfiguration:
+            LogDriver: awslogs
+            Options: 
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-group: 
+                Ref: LogGroup
+              awslogs-stream-prefix: ecs
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:
+        Ref: SecurityGroupDescription
+      GroupName:
+        Ref: SecurityGroupName
+      VpcId:
+        Ref: VPCRef
+      SecurityGroupIngress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: -1
+        SourceSecurityGroupId: 
+          Ref: SecurityGroupVPCRef
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 50
+      HealthCheckPath: /actuator/health
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: 8081
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 2
+      TargetType: ip
+      Name:
+        Ref: TargetGroupName
+      Port: 8080
+      Protocol: HTTP
+      UnhealthyThresholdCount: 3
+      VpcId:
+        Ref: VPCRef
+
+  LoadBalancerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - TargetGroupArn: 
+            Ref: TargetGroup
+          Type: 'forward'
+      Conditions:
+        - Field: http-request-method
+          HttpRequestMethodConfig:
+            Values: ['GET', 'HEAD', 'POST', 'PUT', 'OPTIONS']
+      ListenerArn:
+        Ref: Listener
+      Priority: 1
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: 
+            Ref: TargetGroup
+      LoadBalancerArn: 
+        Ref: LoadBalancer
+      Port: '80'
+      Protocol: HTTP
+  
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      SecurityGroups: 
+        - !Ref LoadBalancerSecurityGroup
+      Subnets:
+        Ref: SubnetRefList
+
+  ECSService: 
+    Type: AWS::ECS::Service
+    DependsOn: LoadBalancerRule
+    Properties:
+      ServiceName:
+        Ref: ECSServiceName
+      Cluster: !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${ECSClusterName}"
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: 
+        Ref: Taskdefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            Ref: SubnetRefList
+      LoadBalancers:
+        - ContainerName: 
+            Ref: ContainerAppName
+          ContainerPort: 8080
+          TargetGroupArn: 
+            Ref: TargetGroup

@@ -6,13 +6,13 @@ variable "tags" {
   type        = map(string)
   description = "Common resource tags"
   default = {
-    Name = "app-reviews"
+    Name = "user-reviews"
   }
 }
 
 variable "project" {
   type    = string
-  default = "review"
+  default = "user-reviews"
 }
 
 
@@ -56,8 +56,6 @@ variable "database_host" {
   default = "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com"
            
 }
-
-
 
 variable "user_reviews_image" {
   type    = string
