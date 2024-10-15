@@ -109,7 +109,7 @@ jobs:
         run: |
           echo "ECR_REGISTRY : $ECR_REGISTRY"
           echo "REGION       : ${{vars.REGION}}"
-          echo "CLUSTER_NAME : ${{vars.CLUSTER_NAME}}
+          echo "CLUSTER_NAME : ${{vars.CLUSTER_NAME}}"
           aws eks update-kubeconfig --region ${{vars.REGION}} --name ${{vars.CLUSTER_NAME}}
           mkdir -p k8s
           export ECR_REPOSITORY_URL="$ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG"
