@@ -29,7 +29,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-       - "33061:3306"
+       - "33061:33061"
   nginx:
     image: nginx:latest
     volumes:

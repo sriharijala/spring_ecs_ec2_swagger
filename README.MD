@@ -61,14 +61,14 @@ services:
 ## Docker commands
 
 - Build Docker image                            : ``docker build -t sjala/user-reviews:1.0 .``
-- Push docker image to Docker Hub         : ``docker push sjala/user-reviews:1.0``
-- Deploy in docker desktop 			          : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
+- Push docker image to Docker Hub               : ``docker push sjala/user-reviews:1.0``
+- Deploy in docker desktop 			      : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
 
 ### Push Docker image to ECR
 
-####Login to AWS ECR
-#####Note : In case Windows, use set REPO=aws_ecr_repo_url and reference variable with %REPO%
-#####Create a repo in ECR and get AWS repo url from aws
+#### Login to AWS ECR
+##### Note : In case Windows, use set REPO=aws_ecr_repo_url and reference variable with %REPO%
+##### Create a repo in ECR and get AWS repo url from aws
     ``export REPO=aws_ecr_repo_url``
     ``aws ecr get-login-password | docker login --username AWS --password-stdin $REPO``
     
@@ -76,6 +76,12 @@ services:
     ``aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin``
     ``docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest``
     ``docker push $REPO:latest``
+
+##### SSH into Docker container
+  - List the containers running on the system: 
+         ```docker ps```
+  - Find the container's IP address with the following docker inspect command:
+         ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
 
 ### Installing Jenkins Server
  - <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html">Create new EC2 instance</a>
@@ -158,4 +164,22 @@ In the this stage, Whenever the developers push their codes to the GitHub reposi
       Script Path: jenkins/jenkinsfile-microservice-app-production
 ```
 
+### Amazon Linux commands
+ - sudo yum -y install telnet
+ - sudo yum -y install mysql
 
+
+ECS Conatiner login
+
+### ECS Clusters Commands
+- List ECS Clsuters: aws ecs list-clusters
+- List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:307946673854:cluster/review-cluster"
+- List tasks: aws ecs list-tasks --cluster review-cluster
+-Login to conatiner: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
+
+### MySQL
+ - Login to MySQL from EC2 Insatnce : mysql -usjala -pJalaJala123 -hsocialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com -P3306
+ - Change schema: use schemaname
+ - List all users: select User,Host from mysql.user;
+
+aws ecs execute-command --cluster review-cluster --task 77063c453c9c4feb89b085a1a6988b28 --container review-app --interactive --command "/bin/bash"

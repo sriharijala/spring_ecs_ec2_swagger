@@ -62,3 +62,12 @@ variable "user-reviews-service" {
   default = "user-reviews-service"
 }
 
+variable "user-reviews-image" {
+  type    = string
+  default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:04de733-2024-10-14-18-59"
+}
+
+variable "ec2-key-pair" {
+  type    = string
+  default = "jala_key_pair"
+}

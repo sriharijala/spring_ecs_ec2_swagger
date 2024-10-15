@@ -15,6 +15,28 @@ spec:
       containers:
       - name: user-reviews
         image: 307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews
+        env:
+        - name: DB_HOST
+          value: "Hello from the environment"
+        - name: DB_DATABASE
+          value: "socialmedia"
+        - name: DB_USER
+          value: "sjala"
+        - name: DB_PASSWORD
+          value: "JalaJala123"
+        - name: APP_CONFIG_DIR
+          value: "sjala"
+        - name: DB_PASSWORD
+          value: "JalaJala123"
+        - name: SPRING_DATASOURCE_URL
+          value: "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com"
+        resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
         ports:
         - containerPort: 8080
           name: http

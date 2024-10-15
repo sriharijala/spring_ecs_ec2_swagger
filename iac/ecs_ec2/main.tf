@@ -25,6 +25,8 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags                 = { Name = "${var.project}-vpc" }
+
+  
 }
 
 resource "aws_subnet" "public" {
@@ -60,7 +62,6 @@ resource "aws_eip" "main" {
 }
 
 # --- Public Route Table ---
-
 resource "aws_route_table" "public" {
   depends_on = [ aws_internet_gateway.main ]
   vpc_id = aws_vpc.main.id
@@ -109,7 +110,10 @@ resource "aws_ecs_cluster" "main" {
 
 data "aws_iam_policy_document" "ecs_node_doc" {
   statement {
-    actions = ["sts:AssumeRole"]
+    actions = [
+        "sts:AssumeRole"
+      ]
+
     effect  = "Allow"
 
     principals {
@@ -153,12 +157,13 @@ resource "aws_security_group" "ecs_node_sg" {
   }
 
    ingress {
-    description = "Bastion Host SG"
+    description = "ECS 2 RDS"
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = [aws_subnet.private[0].cidr_block,aws_subnet.private[1].cidr_block]
-    #security_groups = [aws_security_group.rds_sg]
+    #cidr_blocks = [aws_subnet.private[0].cidr_block,aws_subnet.private[1].cidr_block]
+    #Check ECS Service definition -> Security Groups -> EC2 DB Security group should be one of the value in this array.
+    security_groups = [aws_vpc.main.default_security_group_id, aws_security_group.rds_sg.id]
   }
 
 
@@ -278,7 +283,10 @@ resource "aws_ecr_repository" "app" {
 
 data "aws_iam_policy_document" "ecs_task_doc" {
   statement {
-    actions = ["sts:AssumeRole"]
+    actions = [
+      "sts:AssumeRole"
+    ]
+    
     effect  = "Allow"
 
     principals {
@@ -306,8 +314,8 @@ resource "aws_iam_role_policy_attachment" "ecs_exec_role_policy" {
 # --- Cloud Watch Logs ---
 
 resource "aws_cloudwatch_log_group" "ecs" {
-  name              = "/${var.project}/log-group"
-  retention_in_days = 14
+  name              = "/${var.project}/ecsLogs"
+  retention_in_days = 1
 }
 
 # --- ECS Task Definition ---
@@ -319,24 +327,21 @@ resource "aws_ecs_task_definition" "app" {
   network_mode       = "awsvpc"
   cpu                = 256
   memory             = 256
+  
 
   container_definitions = jsonencode([{
     name         = "${var.project}-app",
-    #image       = "${aws_ecr_repository.app.repository_url}:latest",
-    image        = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:1.6",
-    #image        = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/demo-app",
+    image        = "${var.user_reviews_image}",
     essential    = true,
     portMappings = [{ containerPort = 8080, hostPort = 8080 }],
-
-
     environment = [
       { name = "Environment", value = "${var.environment}" },
-      { name = "DB_HOST", value = "mysql"},
+      { name = "DB_HOST", value = "${var.database_host}"},
       { name = "DB_PORT", value = "3306"},
       { name = "DB_DATABASE", value = "${var.database_name}" },
       { name = "DB_PASSWORD", value = "${var.database_password}" },
       { name = "APP_CONFIG_DIR", value = "/usr/app" },
-      { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://mysql:3306/socialmedia" }
+      { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${var.database_host}:3306/socialmedia" }
     ]
 
     logConfiguration = {
@@ -348,6 +353,20 @@ resource "aws_ecs_task_definition" "app" {
       }
     },
   }])
+}
+
+#-- VPC Flow logs
+resource "aws_cloudwatch_log_group" "network" {
+  name              = "/${var.project}/networkLogs"
+  retention_in_days = 1
+}
+
+
+resource "aws_flow_log" "vpclogs" {
+  iam_role_arn    = aws_iam_role.ecs_node_role.arn
+  log_destination = aws_cloudwatch_log_group.network.arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.main.id
 }
 
 # --- ECS Service ---
@@ -387,6 +406,9 @@ resource "aws_ecs_service" "app" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 2
+
+  enable_ecs_managed_tags = true  # It will tag the network interface with service name
+  wait_for_steady_state   = true  # Terraform will wait for the service to reach a steady state 
 
   network_configuration {
     security_groups = [aws_security_group.ecs_task.id]
@@ -430,7 +452,8 @@ resource "aws_security_group" "rds_sg" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_node_sg.id,aws_security_group.ecs_task.id]
+    //security_groups = [aws_security_group.ecs_node_sg.id,aws_security_group.ecs_task.id]
+    cidr_blocks = [aws_subnet.public[0].cidr_block,aws_subnet.public[1].cidr_block]
   }
 
 
@@ -440,7 +463,8 @@ resource "aws_security_group" "rds_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    security_groups = [aws_security_group.ecs_node_sg.id, aws_security_group.ecs_node_sg.id]
+    #security_groups = [aws_security_group.ecs_node_sg.id, aws_security_group.ecs_node_sg.id]
+    cidr_blocks = [aws_subnet.public[0].cidr_block,aws_subnet.public[1].cidr_block]
   }
   egress {
     description = "output from MySQL"
@@ -492,8 +516,8 @@ resource "aws_db_instance" "mysql" {
   username                = "sjala"
   password                = "JalaJala123"
   db_subnet_group_name    = aws_db_subnet_group.rds_subnet.name
-  vpc_security_group_ids  = [aws_security_group.rds_sg.id, aws_security_group.ecs_node_sg.id, aws_security_group.ecs_task.id]
-
+  vpc_security_group_ids  = [aws_security_group.rds_sg.id, aws_security_group.ecs_node_sg.id, aws_security_group.ecs_task.id, aws_security_group.http.id]
+  
 
   apply_immediately       = true
   deletion_protection     = false #
@@ -514,12 +538,12 @@ resource "aws_db_instance" "mysql" {
 
   # Enable performance insights
   #performance_insights_enabled = true
+  
 
 }
 
 
 # --- ALB ---
-
 resource "aws_security_group" "http" {
   name_prefix = "${var.project}-http-sg-"
   description = "Allow all HTTP/HTTPS traffic from public"
@@ -544,6 +568,7 @@ resource "aws_security_group" "http" {
 }
 
 resource "aws_lb" "main" {
+  depends_on = [ aws_internet_gateway.main ]
   name               = "${var.project}-alb"
   load_balancer_type = "application"
   subnets            = aws_subnet.public[*].id
@@ -557,7 +582,7 @@ resource "aws_lb_target_group" "app" {
   port        = 8080
   target_type = "ip"
 
-
+/*
   health_check {
     enabled             = true
     path                = "/actuator/health"
@@ -568,6 +593,7 @@ resource "aws_lb_target_group" "app" {
     healthy_threshold   = 2
     unhealthy_threshold = 5
   }
+*/
 
 }
 

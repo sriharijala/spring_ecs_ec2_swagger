@@ -233,7 +233,7 @@ resource "aws_db_instance" "mysql" {
   db_name                 = var.database_name
   #availability_zone       = "us-east-1a"
   #publicly_accessible = true
-  multi_az = true
+  #multi_az = true
   
 
 }
@@ -336,11 +336,10 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.ecs_sg.id]
   tags                   = { Name = "${var.project}-bastion" }
-  key_name               = aws_key_pair.generated_key.key_name
+  key_name               = "${var.ec2-key-pair}"
   depends_on             = [aws_subnet.public1 ]
-  //user_data              = file("install_sql_client.sh")
+  #user_data              = file("install_sql_client.sh")
 
-/*
   # Code for installing the softwares!
   provisioner "remote-exec" {
     inline = [
@@ -350,7 +349,6 @@ resource "aws_instance" "bastion" {
       "sudo dnf install mysql-community-client -y"
     ]
   }
-  */
   
 }
 
@@ -497,7 +495,7 @@ resource "aws_ecs_task_definition" "app_task" {
   container_definitions = jsonencode([
     {
       name      = "user-review-container"
-      image     = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:1.0" # Change this to your microservice image
+      image     = "${var.user-reviews-image}" # Change this to your microservice image
       essential = true
       
       portMappings = [
