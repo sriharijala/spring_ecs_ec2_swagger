@@ -59,7 +59,7 @@ variable "database_host" {
 
 variable "user_reviews_image" {
   type    = string
-  default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:04de733-2024-10-14-18-59"
+  default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:ccfef9d-2024-10-15-22-05"
   #default = "nginxdemos/hello" #working
 }
 
