@@ -17,7 +17,7 @@ spec:
         image: 307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews
         env:
         - name: DB_HOST
-          value: "Hello from the environment"
+          value: "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com"
         - name: DB_DATABASE
           value: "socialmedia"
         - name: DB_USER
