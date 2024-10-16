@@ -106,7 +106,7 @@ Two options to deploy
 - Rmove selective resource                       : ``terraform destroy --target resource_name --auto-approve=true``
 
 ### Terraform Knowledge base
-- < hre="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition">How to define multiple services in task definition</a> 
+- <href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition">How to define multiple services in task definition</a> 
 
 
 
@@ -130,36 +130,6 @@ Two options to deploy
          ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
 
 
-
-
-### Create cluster
-Creating cluster.yaml file In order to create an AWS EKS cluster, firstly, create a cluster.yaml file under the /var/lib/jenkins folder, and use the following content, as shown in the figure below. Use the sudo nano cluster.yamlcommand to create cluster.yamlfile.
-
-#####Configuration
-```
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
-metadata:
-  name: petclinic-cluster
-  region: us-east-1
-availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"]
-managedNodeGroups:
-  - name: ng-1
-    instanceType: t2.micro
-    desiredCapacity: 2
-    minSize: 2
-    maxSize: 3
-    volumeSize: 8
-```
-
-#### Create cluster
-eksctl create cluster -f cluster.yaml
-
-###Create Amazon S3 Bucket
-   - Create an S3 bucket to store Helm charts. : eks-monitoring-with-anteon-helm-charts
-   - Create folder :  stable/myapp
-   
    
 ###Create Jenkins pipeline
 
