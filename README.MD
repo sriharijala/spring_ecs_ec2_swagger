@@ -1,4 +1,4 @@
-# Sample User Service
+# Web Service development with SrpingBoot, Swagger, AWS ECS EC2, Terraform, GitHub Workflow
 
 ## Overview
 
