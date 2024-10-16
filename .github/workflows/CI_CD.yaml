@@ -109,17 +109,17 @@ jobs:
           REPOSITORY_URL:  ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
           SERVICE_NAME: "user-reviews"
-          TASK_DEFINITION_NAME: $SERVICE_NAME}"-app"
+          TASK_DEFINITION_NAME: "${SERVICE_NAME}-app"
         run: |
           echo "ECR_REGISTRY : $ECR_REGISTRY"
           echo "REGION       : ${{vars.REGION}}"
           echo "CLUSTER_NAME : ${{vars.CLUSTER_NAME}}"
-          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --region ${{vars.REGION}})
-          NEW_CONTAINER_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE $REPOSITORY_URL:$IMAGE_TAG '.taskDefinition.containerDefinitions[0].image = $IMAGE | .taskDefinition.containerDefinitions[0]')
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_NAME" --region "${{vars.REGION}}")
+          NEW_CONTAINER_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$REPOSITORY_URL:$IMAGE_TAG" '.taskDefinition.containerDefinitions[0].image = $IMAGE | .taskDefinition.containerDefinitions[0]')
           echo "Registering new container definition..."
-          aws ecs register-task-definition --region ${{vars.REGION}} --family $TASK_DEFINITION_NAME --container-definitions $NEW_CONTAINER_DEFINTIION
+          aws ecs register-task-definition --region "${{vars.REGION}}" --family "$TASK_DEFINITION_NAME" --container-definitions "$NEW_CONTAINER_DEFINTIION"
           echo "Updating the service..."
-          aws ecs update-service --region ${{vars.REGION}} --cluster ${{vars.CLUSTER_NAME}} --service ${SERVICE_NAME}  --task-definition $TASK_DEFINITION_NAME
+          aws ecs update-service --region "${{vars.REGION}}" --cluster "${{vars.CLUSTER_NAME}}" --service "${SERVICE_NAME}"  --task-definition "$TASK_DEFINITION_NAME"
 
 
       #- name: Deploy Kubernest Dashboard
