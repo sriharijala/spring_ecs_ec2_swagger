@@ -116,8 +116,9 @@ jobs:
           echo "CLUSTER_NAME : ${{vars.CLUSTER_NAME}}"
           echo "SERVICE_NAME : $SERVICE_NAME"
           echo "TASK_DEFINITION_NAME : $TASK_DEFINITION_NAME"
-          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --region ${{vars.REGION}})
-          NEW_CONTAINER_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE $REPOSITORY_URL:$IMAGE_TAG '.taskDefinition.containerDefinitions[0].image = $IMAGE | .taskDefinition.containerDefinitions[0]')
+          TASK_DEFINITION : $(aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --region ${{vars.REGION}})
+          NEW_CONTAINER_DEFINTIION: $(echo $TASK_DEFINITION | jq --arg IMAGE $REPOSITORY_URL:$IMAGE_TAG '.taskDefinition.containerDefinitions[0].image = $IMAGE | .taskDefinition.containerDefinitions[0]')
+          echo "NEW_CONTAINER_DEFINTIION: $NEW_CONTAINER_DEFINTIION"
           echo "Registering new container definition..."
           aws ecs register-task-definition --region ${{vars.REGION}} --family $TASK_DEFINITION_NAME --container-definitions $NEW_CONTAINER_DEFINTIION
           echo "Updating the service..."
