@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI/CD ECS EC2 Deployment
 
 on:
   push:
