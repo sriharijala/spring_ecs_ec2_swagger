@@ -21,11 +21,6 @@ variable "environment" {
   default = "prod"
 }
 
-variable "bastion_ami" {
-  type    = string
-  default = "ami-0fff1b9a61dec8a5f"
-}
-
 variable "bastion_instance_type" {
   type    = string
   default = "t2.micro"
