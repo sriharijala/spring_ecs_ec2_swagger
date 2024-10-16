@@ -57,9 +57,9 @@ Two options to deploy
 #### How to use
  - Clone the GitRpo
  - Create ECR Repo
- - ![Update the Terraform variables](#### Terraform variables)
+ - Update the Terraform variables (#### Terraform variables)
  - Run the GitHub workflow to prepare image in your AWS ECR
- - ![Provision AWS Resources and deploy](### Provision AWS resource using Terraform)
+ - Provision AWS Resources and deploy (### Provision AWS resource using Terraform)
  - Access Web Service at Terraform output : {alb_url}
 
 #### Terraform variables
