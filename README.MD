@@ -50,7 +50,7 @@ Two options to deploy
 
 #### Configuring AWS CLI
  - Configure AWS CLI
-     - ``[ec2-user@ip-172-31-45-206 jenkins]$ aws configure``
+     - ``$ aws configure``
      - ``AWS Access Key ID [None]: <enter-access-key-id>``
      - ``AWS Secret Access Key [None]: <enter-access-key>``
 
