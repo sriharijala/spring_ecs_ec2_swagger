@@ -101,22 +101,25 @@ jobs:
         run: |
             docker build -t $ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG .
             docker push $ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG
-          
-      - name: Deploy to EKS
+
+
+      - name: Deploy to ECS EC2
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY_URL:  ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
+          TASK_DEFINITION_NAME: "user-review-app"
+          SERVICE_NAME: "user-reviews"
         run: |
           echo "ECR_REGISTRY : $ECR_REGISTRY"
           echo "REGION       : ${{vars.REGION}}"
           echo "CLUSTER_NAME : ${{vars.CLUSTER_NAME}}"
-          aws eks update-kubeconfig --region ${{vars.REGION}} --name ${{vars.CLUSTER_NAME}}
-          mkdir -p k8s
-          export ECR_REPOSITORY_URL="$ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG"
-          envsubst < k8s-deployment.yaml > k8s/k8s-deployment.yaml
-          echo "resources:" > k8s/kustomization.yaml
-          echo "- k8s-deployment.yaml" >> k8s/kustomization.yaml
-          kubectl kustomize k8s | kubectl apply -f - --force
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --region ${{vars.REGION}})
+          NEW_CONTAINER_DEFINTIION=$(echo $TASK_DEFINITION | jq --arg IMAGE $REPOSITORY_URL:$IMAGE_TAG '.taskDefinition.containerDefinitions[0].image = $IMAGE | .taskDefinition.containerDefinitions[0]')
+          echo "Registering new container definition..."
+          aws ecs register-task-definition --region ${{vars.REGION}} --family $TASK_DEFINITION_NAME --container-definitions $NEW_CONTAINER_DEFINTIION
+          echo "Updating the service..."
+          aws ecs update-service --region ${{vars.REGION}} --cluster ${{vars.CLUSTER_NAME}} --service ${SERVICE_NAME}  --task-definition $TASK_DEFINITION_NAME
 
 
       #- name: Deploy Kubernest Dashboard
