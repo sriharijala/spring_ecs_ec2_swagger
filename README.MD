@@ -58,6 +58,9 @@ services:
 - List all resources crated                      : ``terraform state list``
 - Rmove selective resource                       : ``terraform destroy --target resource_name --auto-approve=true``
 
+## Terraform Knowledge base
+- < hre="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition">How to define multiple services in task definition</a> 
+
 ## Docker commands
 
 - Build Docker image                            : ``docker build -t sjala/user-reviews:1.0 .``
@@ -184,3 +187,13 @@ ECS Conatiner login
  - Grant access to user from any host: ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
 
 aws ecs execute-command --cluster review-cluster --task 77063c453c9c4feb89b085a1a6988b28 --container review-app --interactive --command "/bin/bash"
+
+---
+Amazon Elastic Container Service >
+Clusters >
+user-reviews >
+Services >
+user-reviews >
+Tasks >
+0384fdbec3784a068899f3538636e67c >
+Configuration

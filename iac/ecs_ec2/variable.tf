@@ -53,18 +53,18 @@ variable "key_name" {
 
 variable "inbound_ports" {
   type    = list(string)
-  default = [22, 80, 443,8080]
+  default = [22, 80, 443, 8080]
 }
 
 variable "database_host" {
   type    = string
   default = "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com"
-           
+
 }
 
 variable "user_reviews_image" {
   type    = string
-  default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:5007bd9-2024-10-16-03-10"
+  default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:dc890ca-2024-10-16-04-17"
   #default = "nginxdemos/hello" #working
 }
 

@@ -594,7 +594,8 @@ resource "aws_lb_target_group" "app" {
   vpc_id      = aws_vpc.main.id
   protocol    = "HTTP"
   port        = 8080
-  target_type = "ip"
+  target_type = "ip"  #"instance"  --With "ip" getting error while updating the image from Github action ECS - target type ip is incompatible with the bridge network mode specified in the task definition
+  deregistration_delay = 300
 
   /*
   health_check {
