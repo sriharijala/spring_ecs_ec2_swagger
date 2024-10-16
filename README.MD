@@ -6,7 +6,7 @@ This guide describes a way create an AWS ECS Cluster on EC2 with cuurent verion 
 
 ### Overall architecture
 
-![Git Hub Secretes](images/UserReviews_AWS_Architect.png)
+![Git Hub Secretes](images/UserReviews_AWS_Architect.svg)
 
 ### Resources created with Terraform:
  - VPC with public & Private subnets
