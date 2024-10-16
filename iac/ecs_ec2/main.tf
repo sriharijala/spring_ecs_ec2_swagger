@@ -563,7 +563,8 @@ resource "aws_lb_listener" "http" {
 }
 
 output "alb_url" {
-  value = aws_lb.main.dns_name
+  value = format("%s%s%s", "http://", aws_lb.main.dns_name,":8080/swagger-ui/index.html")
+  
 }
 
 output "mysql_db_url" {

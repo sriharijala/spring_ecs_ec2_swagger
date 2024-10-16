@@ -54,8 +54,16 @@ Two options to deploy
      - ``AWS Access Key ID [None]: <enter-access-key-id>``
      - ``AWS Secret Access Key [None]: <enter-access-key>``
 
+#### How to use
+ - Clone the GitRpo
+ - Create ECR Repo
+ - [Update the Terraform variables](#### Terraform variables)
+ - Run the GitHub workflow to prepare image in your AWS ECR
+ - [Provision AWS Resources and deploy](### Provision AWS resource using Terraform)
+ - Access Web Service at : http://{alb_url}:8080/
+
 #### Terraform variables
- - Following riables in variables.tf can be modified as needed
+ - Following variables in variables.tf can be modified as needed
      - environment        : environment tag
      - key_name           : AWS Key pair
      - aws_ecr_app_image  : Image Id from ECR registry. it has both the registry and image version 
@@ -78,7 +86,7 @@ Two options to deploy
 - Branches to build:
       Branch Specifier: */main 
 
-### Running Terraform 
+### Provision AWS resource using Terraform 
  - Change to directory iac/ecs_ecs 
  - Intilize Terraform                      
      ```terraform init```
@@ -99,7 +107,7 @@ Two options to deploy
 
 
 ## End point URLS
-- Swagger end point: http://{alb_url}:8080/swagger-ui/index.html
+- Swagger end point URL from Terraform output : {alb_url}
 
 ## Helpful commands
 
