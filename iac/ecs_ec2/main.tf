@@ -338,6 +338,7 @@ resource "aws_ecs_task_definition" "app" {
       { name = "DB_HOST", value = "${var.database_host}"},
       { name = "DB_PORT", value = "3306"},
       { name = "DB_DATABASE", value = "${var.database_name}" },
+      { name = "DB_USER", value = "${var.database_username}"},
       { name = "DB_PASSWORD", value = "${var.database_password}" },
       { name = "APP_CONFIG_DIR", value = "/usr/app" },
       { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${var.database_host}:3306/socialmedia" }

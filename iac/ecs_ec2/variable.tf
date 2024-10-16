@@ -36,6 +36,11 @@ variable "database_name" {
   default = "socialmedia"
 }
 
+variable "database_username" {
+  type    = string
+  default = "sjala"
+}
+
 variable "database_password" {
   type    = string
   default = "JalaJala123"
@@ -59,7 +64,7 @@ variable "database_host" {
 
 variable "user_reviews_image" {
   type    = string
-  default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:defc6d6-2024-10-15-22-47"
+  default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:5007bd9-2024-10-16-03-10"
   #default = "nginxdemos/hello" #working
 }
 
