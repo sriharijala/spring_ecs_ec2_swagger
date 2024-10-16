@@ -160,8 +160,6 @@ resource "aws_security_group" "ecs_node_sg" {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    #cidr_blocks = [aws_subnet.private[0].cidr_block,aws_subnet.private[1].cidr_block]
-    #Check ECS Service definition -> Security Groups -> EC2 DB Security group should be one of the value in this array.
     security_groups = [aws_vpc.main.default_security_group_id, aws_security_group.rds_sg.id]
   }
 
@@ -264,19 +262,6 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
     weight            = 100
   }
 }
-
-
-/*
-resource "aws_ecr_repository" "app" {
-  name                 = "swagger-ui/index.html"
-  image_tag_mutability = "MUTABLE"
-  force_delete         = true
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-*/
 
 # --- ECS Task Role ---
 
@@ -450,20 +435,9 @@ resource "aws_security_group" "rds_sg" {
     from_port = 3306
     to_port   = 3306
     protocol  = "tcp"
-    //security_groups = [aws_security_group.ecs_node_sg.id,aws_security_group.ecs_task.id]
-    cidr_blocks = [aws_subnet.public[0].cidr_block, aws_subnet.public[1].cidr_block]
+     cidr_blocks = [aws_subnet.public[0].cidr_block, aws_subnet.public[1].cidr_block]
   }
 
-
-  # Created an inbound rule for MySQL Bastion Host
-  ingress {
-    description = "Bastion Host SG"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    #security_groups = [aws_security_group.ecs_node_sg.id, aws_security_group.ecs_node_sg.id]
-    cidr_blocks = [aws_subnet.public[0].cidr_block, aws_subnet.public[1].cidr_block]
-  }
   egress {
     description = "output from MySQL"
     from_port   = 0
@@ -520,7 +494,7 @@ resource "aws_db_instance" "mysql" {
   apply_immediately   = true
   deletion_protection = false #
   db_name             = var.database_name
-  #multi_az = true 
+  multi_az = true 
 
   backup_retention_period = 0 # Number of days to retain automated backups
   #backup_window = "03:00-04:00" # Preferred UTC backup window (hh24:mi-hh24:mi format)
@@ -530,30 +504,8 @@ resource "aws_db_instance" "mysql" {
   skip_final_snapshot       = true
   final_snapshot_identifier = "${var.project}-db-snap"
 
-  # Enable enhanced monitoring
-  #monitoring_interval = 60 # Interval in seconds (minimum 60 seconds)
-  #monitoring_role_arn = aws_iam_role.rds_monitoring_role.arn
-
-  # Enable performance insights
-  #performance_insights_enabled = true
-
-
 }
 
-
-#--- Set up DB ---
-data "local_file" "sql_script" {
-  filename = "${path.module}/init/db_structure.sql"
-}
-
-/*
-resource "null_resource" "db_setup" {
-  depends_on = [aws_db_instance.mysql, aws_security_group.rds_sg]
-  provisioner "local-exec" {
-    command = "mysql --host=${aws_db_instance.mysql.address} --port=${aws_db_instance.mysql.port} --user=sjala --password=${var.database_password} --database=${var.database_name} < ${data.local_file.sql_script.content}"
-  }
-}
-*/
 
 
 # --- ALB ---
@@ -597,19 +549,6 @@ resource "aws_lb_target_group" "app" {
   target_type = "ip"  #"instance"  --With "ip" getting error while updating the image from Github action ECS - target type ip is incompatible with the bridge network mode specified in the task definition
   deregistration_delay = 300
 
-  /*
-  health_check {
-    enabled             = true
-    path                = "/actuator/health"
-    port                = 8080
-    matcher             = 200
-    interval            = 10
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 5
-  }
-*/
-
 }
 
 resource "aws_lb_listener" "http" {
@@ -627,32 +566,7 @@ output "alb_url" {
   value = aws_lb.main.dns_name
 }
 
-/*
-output "app_repo_url" {
-  value = aws_ecr_repository.app.repository_url
-}
-*/
-
 output "mysql_db_url" {
   value = aws_db_instance.mysql.endpoint
 }
 
-output "db_init_file_path" {
-  value = data.local_file.sql_script.filename
-}
-
-
-
-/* TO DO outside 
-Let’s run terraform apply again. We should see output with repository URL in AWS. Now push user-reviews to ECR.
-
-# Get AWS repo url from Terraform outputs
-export REPO=$(terraform output --raw demo_app_repo_url)
-# Login to AWS ECR
-aws ecr get-login-password | docker login --username AWS --password-stdin $REPO
-
-# Pull docker image & push to our ECR
-docker pull --platform linux/amd64 sjala/user-reviews:1.0
-docker tag strm/helloworld-http:latest $REPO:latest
-docker push $REPO:latest
-*/

@@ -2,54 +2,101 @@
 
 ## Overview ##
 
-This example use the demonstrate the technologies
-   - Swagger UI 
-   - Deployment to Docker desktop
-        * Nginx load balancer
-        * Replication of service 
+This guide describes a way create an AWS ECS Cluster on EC2 with cuurent verion in 2024. The sample application uses SpringBoot with JPA for web service, Swagger to test the web serveice, MYSQL Database for data storage backend, Terraform for AWS resource provisoning and deployment  Infrastructure As Code, and GitHub worklfow. The purpose of this article is to showcase a way to asemble all componenet to deploy a scalable web service in ECS Cluster on EC2 instances.
 
-## URLS
-- End point to see environment variable using actuator:  http://localhost:8081/actuator/env
-- Swagger end point: http://localhost:8080/swagger-ui/index.html
+### Overall architecture
 
-## Replication and Load Balancing using NGINX
-To replicate the services we need to solve the issue with host port conflict. The host machine can only bind an unallocated port to one container only, otherwise  we get an error "failed: port is already allocated error for additional XXX service".
+![Git Hub Secretes](docs/UserReviews_AWS_Architect.png)
 
-- Use the load balancer will access the back end service without exposing the container ports and distribute the traffic across multiple containers.
+### Resources created with Terraform:
+ - VPC with public & Private subnets
+ - Internet Gateway to connect to the global Internet from public subnet
+ - Security groups for EC2 Node & ECS Service
+ - Auto-scaling group for ECS cluster using EC2
+ - Installing the image to ECR
+ - ECS cluster with task and service definition
+ - Load Balancer to public access & scale ECS Service
 
-Here is the overview of load balancing using NGINX
-<img src="https://github.com/sriharijala/SpringExamples/blob/main/jpa-hibernate_crud/src/main/resources/images/nginx_lb.png"/>
+### GitHub workflow handles
+ - Code checkout on events
+ - Prepare Maven builds
+ - Custom tag each build with code check-in hash and the time stamp
+ - Login to Amazon ECR
+ - Publish image to ECR
 
-```
-nginx.conf
+## Preparation
 
-user  nginx;
-events {
-    worker_connections   1000;
-}
-http {
-        server {
-              listen 80;
-              location / {
-                proxy_pass http://user-reviews:8080;
-              }
-        }
-}
-```
+Two options to deploy 
+  -- Docker desktop
+  -- AWS ECS with conatiners running on EC2. (Note: With slight changes can be deployed to FARGATE and EKS)
 
-- In docker-compose.yml expose only the container port
+### Git Hub Secrets and Variables
 
-```
-services:
-  user-reviews:
-    image: sjala/user-reviews:latest
-    depends_on:
-       - mysql
-    expose:
-      - "8080"
-```
+ - Setup the secrets to login to AWS account
+    ![Git Hub Secretes](docs/GitHubSecrets.png)
+ 
+ - Application variables
+    ![Git Hub variables](docs/GitHubVariables.png)
 
-## Terrform commands ##
+### Deploying docker desktop
+
+#### Docker commands
+
+- Build Docker image                            : ``docker build -t sjala/user-reviews:1.0 .``
+- Push docker image to Docker Hub               : ``docker push sjala/user-reviews:1.0``
+- Deploy in docker desktop 			      : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
+
+### Deploying to AWS
+
+#### Configuring AWS CLI
+ - Configure AWS CLI
+     - ``[ec2-user@ip-172-31-45-206 jenkins]$ aws configure``
+     - ``AWS Access Key ID [None]: <enter-access-key-id>``
+     - ``AWS Secret Access Key [None]: <enter-access-key>``
+
+#### Terraform variables
+ - Following riables in variables.tf can be modified as needed
+     - environment        : environment tag
+     - key_name           : AWS Key pair
+     - aws_ecr_app_image  : Image Id from ECR registry. it has both the registry and image version 
+       - Ex       : AWS_ACCCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/sjala/user-reviews:622d47c-2024-10-16-19-08
+       - ECR      : AWS_ACCCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com
+          <a href="docs/AWS_ECR.jpg">
+       - Image Id : sjala/user-reviews:622d47c-2024-10-16-19-08
+          <a href="docs/AWS_ECR_image.jpg">
+     - database_username  : MySQL DB User name 
+     - database_password  : MYSQL DB Uer password 
+       - (Note: Please use the system environment variables or secrte stores DB credentials)
+    
+
+#### GitHub workflow can be customized : CI_CD_ECS_EC2_Deploment.yml
+
+### Running Terraform 
+ - Change to directory iac/ecs_ecs 
+ - Intilize Terraform                      
+     ```terraform init```
+
+ - Run the Tearrform plan             
+     ```terraform plan```
+
+ - Run apply the Terraform with auto approve
+     ```terraform apply --auto-approve=true```
+
+ - Run to dismantle the AWS infrastructure     
+     ```terraform destroy --auto-approve=true```
+
+#### Outputs from Tearrform
+ - The ALB load balancer URL and mysql Database URL.
+    alb_url = "user-reviews-alb-1057870179.us-east-1.elb.amazonaws.com"
+    mysql_db_url = "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com:3306"
+
+
+## End point URLS
+- Swagger end point: http://{alb_url}:8080/swagger-ui/index.html
+
+## Helpful commands
+
+### Terrform commands ###
 - Initialize terraform                           : ``terraform init``
 - Execuate the plan                              : ``terraform plan``
 - Create the infrastucture with auto approve     : ``terraform plan --auto-approve=true``
@@ -58,14 +105,10 @@ services:
 - List all resources crated                      : ``terraform state list``
 - Rmove selective resource                       : ``terraform destroy --target resource_name --auto-approve=true``
 
-## Terraform Knowledge base
+### Terraform Knowledge base
 - < hre="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition">How to define multiple services in task definition</a> 
 
-## Docker commands
 
-- Build Docker image                            : ``docker build -t sjala/user-reviews:1.0 .``
-- Push docker image to Docker Hub               : ``docker push sjala/user-reviews:1.0``
-- Deploy in docker desktop 			      : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
 
 ### Push Docker image to ECR
 
@@ -75,7 +118,7 @@ services:
     ``export REPO=aws_ecr_repo_url``
     ``aws ecr get-login-password | docker login --username AWS --password-stdin $REPO``
     
-#####Pull docker image & push to our ECR
+##### Pull docker image & push to our ECR
     ``aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin``
     ``docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest``
     ``docker push $REPO:latest``
@@ -86,38 +129,8 @@ services:
   - Find the container's IP address with the following docker inspect command:
          ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
 
-### Installing Jenkins Server
- - <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html">Create new EC2 instance</a>
- - <a href="https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/">Install Jenkins on new EC2</a>
- - Jenkins server root access - ``sudo su``
- - Change user to jenkins : ``sudo su -s /bin/bash jenkins``
- - Restarting Jenkins - ``sudo systemctl restart jenkins``
- - <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">Install AWS CLI</a>
- - <a href="https://eksctl.io/installation/">Install cksctl</a>
- - <a href="https://docs.aws.amazon.com/eks/latest/userguide/helm.html">Install helm</a>
- - Install Git 
- 
- ```
-    sudo yum update -y
-    sudo yum install git -y
-    git --version
-    git config --global user.name “Your Name”
-    git config --global user.email “your_email@example.com”
-```
 
-###Install the helm-s3 plugin in Jenkin server for Amazon S3 access.
 
-```
-sudo su -s /bin/bash jenkins # You must use "jenkins" user.
-export PATH=$PATH:/usr/local/bin
-helm version
-helm plugin install https://github.com/hypnoglow/helm-s3.git
-```
-
- - Configure AWS CLI
-     - ``[ec2-user@ip-172-31-45-206 jenkins]$ aws configure``
-     - ``AWS Access Key ID [None]: <enter-access-key-id>``
-     - ``AWS Secret Access Key [None]: <enter-access-key>``
 
 ### Create cluster
 Creating cluster.yaml file In order to create an AWS EKS cluster, firstly, create a cluster.yaml file under the /var/lib/jenkins folder, and use the following content, as shown in the figure below. Use the sudo nano cluster.yamlcommand to create cluster.yamlfile.
@@ -188,12 +201,20 @@ ECS Conatiner login
 
 aws ecs execute-command --cluster review-cluster --task 77063c453c9c4feb89b085a1a6988b28 --container review-app --interactive --command "/bin/bash"
 
----
-Amazon Elastic Container Service >
-Clusters >
-user-reviews >
-Services >
-user-reviews >
-Tasks >
-0384fdbec3784a068899f3538636e67c >
-Configuration
+### Reference Documentation
+For further reference, please consider the following sections:
+
+* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
+* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/3.3.2/maven-plugin)
+* [Create an OCI image](https://docs.spring.io/spring-boot/3.3.2/maven-plugin/build-image.html)
+* [Spring Web](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#web)
+* [Spring Data JPA](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#data.sql.jpa-and-spring-data)
+
+### Guides
+The following guides illustrate how to use some features concretely:
+
+* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
+* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
+* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
+* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
