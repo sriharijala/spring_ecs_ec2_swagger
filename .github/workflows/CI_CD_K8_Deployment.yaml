@@ -1,0 +1,127 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 18
+      uses: actions/setup-java@v4
+      with:
+        java-version: 18
+        distribution: 'adopt'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Build and test with Maven
+      run: mvn --batch-mode --update-snapshots --no-transfer-progress clean package
+
+    - name: Upload JAR file
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-jar
+        path: target/*.jar
+      
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'adopt'
+
+      - name: Download JAR file
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: target
+
+      - name: Get commit hash
+        id: get-commit-hash
+        run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
+  
+      - name: Get timestamp
+        id: get-timestamp
+        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
+
+      - name: Get Image Tag
+        id: get-imagetag
+        run: echo "::set-output name=imagetag::${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}"
+  
+      - name: Build Docker image
+        run: docker build -t ${{vars.USER_REPOSITORY}}:${{ steps.get-imagetag.outputs.imagetag}} .
+
+      - name: Install and configure AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2                         # default
+          verbose: false                     # default
+          arch: amd64                        # allowed values: amd64, arm64
+          bindir: "/usr/local/bin"           # default
+          installrootdir: "/usr/local"       # default
+          rootdir: ""                        # defaults to "PWD"
+          workdir: ""                        # defaults to "PWD/unfor19-awscli"  
+
+      - name: Configure AWS Credentials 2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID  }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+     
+      - name: Build, tag, and push the image to Amazon ECR
+        id: build-image
+        env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
+        run: |
+            docker build -t $ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG .
+            docker push $ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG
+          
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
+        run: |
+          echo "ECR_REGISTRY : $ECR_REGISTRY"
+          echo "REGION       : ${{vars.REGION}}"
+          echo "CLUSTER_NAME : ${{vars.CLUSTER_NAME}}"
+          aws eks update-kubeconfig --region ${{vars.REGION}} --name ${{vars.CLUSTER_NAME}}
+          mkdir -p k8s
+          export ECR_REPOSITORY_URL="$ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG"
+          envsubst < k8s-deployment.yaml > k8s/k8s-deployment.yaml
+          echo "resources:" > k8s/kustomization.yaml
+          echo "- k8s-deployment.yaml" >> k8s/kustomization.yaml
+          kubectl kustomize k8s | kubectl apply -f - --force
+
+
+      #- name: Deploy Kubernest Dashboard
+      #  run: |
+      #    helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+      #   kubectl create ns kubernetes-dashboard
+      #   helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --namespace kubernetes-dashboard --version "7.4.0"
+        
