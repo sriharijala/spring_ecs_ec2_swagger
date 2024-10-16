@@ -375,6 +375,7 @@ resource "aws_security_group" "ecs_task" {
   description = "Allow all traffic within the VPC"
   vpc_id      = aws_vpc.main.id
 
+  #SG allows access to the service only for VPC network members.
   ingress {
     from_port   = 0
     to_port     = 0
@@ -382,13 +383,7 @@ resource "aws_security_group" "ecs_task" {
     cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
- ingress {
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = [aws_subnet.private[0].cidr_block,aws_subnet.private[1].cidr_block]
-  }
-
+  #access to the Internet
   egress {
     from_port   = 0
     to_port     = 0
@@ -420,6 +415,7 @@ resource "aws_ecs_service" "app" {
     weight            = 100
   }
 
+  # each service instance is equally distributed across Availability Zones
   ordered_placement_strategy {
     type  = "spread"
     field = "attribute:ecs.availability-zone"
@@ -558,6 +554,7 @@ resource "null_resource" "db_setup" {
 
 
 # --- ALB ---
+# service available from the public network
 resource "aws_security_group" "http" {
   name_prefix = "${var.project}-http-sg-"
   description = "Allow all HTTP/HTTPS traffic from public"

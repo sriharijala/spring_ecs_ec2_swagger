@@ -31,4 +31,4 @@ USER appuser
 
 # Open the mapped port
 EXPOSE 8080
-ENTRYPOINT ["sleep 35", "java","-jar","-Djava.security.egd=file:/dev/./urandom","app.jar","--spring.profiles.active=prod"]
+ENTRYPOINT [ "java","-jar","-Djava.security.egd=file:/dev/./urandom","app.jar","--spring.profiles.active=prod"]
