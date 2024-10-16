@@ -14,8 +14,8 @@ provider "aws" {
 data "aws_availability_zones" "available" { state = "available" }
 
 locals {
-  azs_count = 2   #use two zones
-  azs_names = data.aws_availability_zones.available.names
+  azs_count  = 2 #use two zones
+  azs_names  = data.aws_availability_zones.available.names
   dbHostName = aws_db_instance.mysql.endpoint
 }
 
@@ -26,7 +26,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
   tags                 = { Name = "${var.project}-vpc" }
 
-  
+
 }
 
 resource "aws_subnet" "public" {
@@ -50,9 +50,9 @@ resource "aws_subnet" "private" {
 # --- Internet Gateway ---
 
 resource "aws_internet_gateway" "main" {
-  depends_on = [ aws_ecs_task_definition.app ]
-  vpc_id = aws_vpc.main.id
-  tags   = { Name = "${var.project}-igw" }
+  depends_on = [aws_ecs_task_definition.app]
+  vpc_id     = aws_vpc.main.id
+  tags       = { Name = "${var.project}-igw" }
 }
 
 resource "aws_eip" "main" {
@@ -63,9 +63,9 @@ resource "aws_eip" "main" {
 
 # --- Public Route Table ---
 resource "aws_route_table" "public" {
-  depends_on = [ aws_internet_gateway.main ]
-  vpc_id = aws_vpc.main.id
-  tags   = { Name = "${var.project}-rt-public" }
+  depends_on = [aws_internet_gateway.main]
+  vpc_id     = aws_vpc.main.id
+  tags       = { Name = "${var.project}-rt-public" }
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -74,7 +74,7 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  depends_on = [aws_route_table.public  ]
+  depends_on     = [aws_route_table.public]
   count          = local.azs_count
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
@@ -83,9 +83,9 @@ resource "aws_route_table_association" "public" {
 
 # --- Private Route Table ---
 resource "aws_route_table" "private" {
-  depends_on = [ aws_internet_gateway.main ]
-  vpc_id = aws_vpc.main.id
-  tags   = { Name = "${var.project}-rt-private" }
+  depends_on = [aws_internet_gateway.main]
+  vpc_id     = aws_vpc.main.id
+  tags       = { Name = "${var.project}-rt-private" }
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -94,7 +94,7 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table_association" "private" {
-  depends_on = [ aws_route_table.private ]
+  depends_on     = [aws_route_table.private]
   count          = local.azs_count
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
@@ -102,7 +102,7 @@ resource "aws_route_table_association" "private" {
 
 # --- ECS Cluster ---
 resource "aws_ecs_cluster" "main" {
-  name = "${var.project}"
+  name = var.project
 }
 
 # --- ECS Node Role ---
@@ -110,10 +110,10 @@ resource "aws_ecs_cluster" "main" {
 data "aws_iam_policy_document" "ecs_node_doc" {
   statement {
     actions = [
-        "sts:AssumeRole"
-      ]
+      "sts:AssumeRole"
+    ]
 
-    effect  = "Allow"
+    effect = "Allow"
 
     principals {
       type        = "Service"
@@ -134,7 +134,7 @@ resource "aws_iam_role_policy_attachment" "ecs_node_role_policy" {
 }
 
 resource "aws_iam_instance_profile" "ecs_node" {
-  depends_on = [aws_iam_role.ecs_node_role  ]
+  depends_on  = [aws_iam_role.ecs_node_role]
   name_prefix = "${var.project}-ecs-node-profile"
   path        = "/ecs/instance/"
   role        = aws_iam_role.ecs_node_role.name
@@ -143,7 +143,7 @@ resource "aws_iam_instance_profile" "ecs_node" {
 # --- ECS Node SG ---
 
 resource "aws_security_group" "ecs_node_sg" {
-  depends_on = [ aws_subnet.private ]
+  depends_on  = [aws_subnet.private]
   name_prefix = "${var.project}-ecs-node-sg-"
   vpc_id      = aws_vpc.main.id
 
@@ -155,7 +155,7 @@ resource "aws_security_group" "ecs_node_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-   ingress {
+  ingress {
     description = "ECS 2 RDS"
     from_port   = 3306
     to_port     = 3306
@@ -181,7 +181,7 @@ data "aws_ssm_parameter" "ecs_node_ami" {
 }
 
 resource "aws_launch_template" "ecs_ec2" {
-  depends_on = [aws_security_group.ecs_node_sg, aws_iam_instance_profile.ecs_node  ]
+  depends_on             = [aws_security_group.ecs_node_sg, aws_iam_instance_profile.ecs_node]
   name_prefix            = "${var.project}-ecs-ec2-"
   image_id               = data.aws_ssm_parameter.ecs_node_ami.value
   instance_type          = "t2.micro"
@@ -190,7 +190,7 @@ resource "aws_launch_template" "ecs_ec2" {
   iam_instance_profile { arn = aws_iam_instance_profile.ecs_node.arn }
   monitoring { enabled = true }
 
-  key_name = "${var.key_name}"
+  key_name = var.key_name
 
   user_data = base64encode(<<-EOF
       #!/bin/bash
@@ -201,7 +201,7 @@ resource "aws_launch_template" "ecs_ec2" {
 
 # --- ECS ASG ---
 resource "aws_autoscaling_group" "ecs" {
-  depends_on = [ aws_launch_template.ecs_ec2 ]
+  depends_on = [aws_launch_template.ecs_ec2]
 
   name_prefix               = "${var.project}-ecs-asg-"
   vpc_zone_identifier       = aws_subnet.public[*].id
@@ -228,14 +228,14 @@ resource "aws_autoscaling_group" "ecs" {
     propagate_at_launch = true
   }
 
-  
+
 }
 
 # --- ECS Capacity Provider ---
 
 resource "aws_ecs_capacity_provider" "main" {
 
-  depends_on = [ aws_autoscaling_group.ecs ]
+  depends_on = [aws_autoscaling_group.ecs]
 
   name = "${var.project}-ecs-ec2"
 
@@ -253,7 +253,7 @@ resource "aws_ecs_capacity_provider" "main" {
 }
 
 resource "aws_ecs_cluster_capacity_providers" "main" {
-  depends_on = [ aws_ecs_cluster.main, aws_ecs_capacity_provider.main ]
+  depends_on = [aws_ecs_cluster.main, aws_ecs_capacity_provider.main]
 
   cluster_name       = aws_ecs_cluster.main.name
   capacity_providers = [aws_ecs_capacity_provider.main.name]
@@ -285,8 +285,8 @@ data "aws_iam_policy_document" "ecs_task_doc" {
     actions = [
       "sts:AssumeRole"
     ]
-    
-    effect  = "Allow"
+
+    effect = "Allow"
 
     principals {
       type        = "Service"
@@ -319,26 +319,28 @@ resource "aws_cloudwatch_log_group" "ecs" {
 
 # --- ECS Task Definition ---
 resource "aws_ecs_task_definition" "app" {
-  depends_on = [ aws_db_instance.mysql ]
+  depends_on         = [aws_db_instance.mysql]
   family             = "${var.project}-app"
   task_role_arn      = aws_iam_role.ecs_task_role.arn
   execution_role_arn = aws_iam_role.ecs_exec_role.arn
   network_mode       = "awsvpc"
   cpu                = 256
   memory             = 256
-  
+
 
   container_definitions = jsonencode([{
     name         = "${var.project}-app",
     image        = "${var.user_reviews_image}",
     essential    = true,
     portMappings = [{ containerPort = 8080, hostPort = 8080 }],
+    cpu                = 256,
+    memory             = 256,
     environment = [
       { name = "Environment", value = "${var.environment}" },
-      { name = "DB_HOST", value = "${var.database_host}"},
-      { name = "DB_PORT", value = "3306"},
+      { name = "DB_HOST", value = "${var.database_host}" },
+      { name = "DB_PORT", value = "3306" },
       { name = "DB_DATABASE", value = "${var.database_name}" },
-      { name = "DB_USER", value = "${var.database_username}"},
+      { name = "DB_USER", value = "${var.database_username}" },
       { name = "DB_PASSWORD", value = "${var.database_password}" },
       { name = "APP_CONFIG_DIR", value = "/usr/app" },
       { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${var.database_host}:3306/socialmedia" }
@@ -394,16 +396,16 @@ resource "aws_security_group" "ecs_task" {
 }
 
 resource "aws_ecs_service" "app" {
-  
+
   depends_on = [aws_lb_target_group.app, aws_lb.main]
 
-  name            = "${var.project}"
+  name            = var.project
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 2
 
-  enable_ecs_managed_tags = true  # It will tag the network interface with service name
-  wait_for_steady_state   = true  # Terraform will wait for the service to reach a steady state 
+  enable_ecs_managed_tags = true # It will tag the network interface with service name
+  wait_for_steady_state   = true # Terraform will wait for the service to reach a steady state 
 
   network_configuration {
     security_groups = [aws_security_group.ecs_task.id]
@@ -435,32 +437,32 @@ resource "aws_ecs_service" "app" {
 
 #-- RDS database
 resource "aws_security_group" "rds_sg" {
-  depends_on = [ aws_vpc.main ]
+  depends_on = [aws_vpc.main]
 
   tags   = var.tags
   name   = "${var.project}-rds-sg"
   vpc_id = aws_vpc.main.id
-  
-  
+
+
 
   /* after testing uncomment this and remove the otehr ingress block wide open one.teams*/
   ingress {
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
     //security_groups = [aws_security_group.ecs_node_sg.id,aws_security_group.ecs_task.id]
-    cidr_blocks = [aws_subnet.public[0].cidr_block,aws_subnet.public[1].cidr_block]
+    cidr_blocks = [aws_subnet.public[0].cidr_block, aws_subnet.public[1].cidr_block]
   }
 
 
-# Created an inbound rule for MySQL Bastion Host
+  # Created an inbound rule for MySQL Bastion Host
   ingress {
     description = "Bastion Host SG"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     #security_groups = [aws_security_group.ecs_node_sg.id, aws_security_group.ecs_node_sg.id]
-    cidr_blocks = [aws_subnet.public[0].cidr_block,aws_subnet.public[1].cidr_block]
+    cidr_blocks = [aws_subnet.public[0].cidr_block, aws_subnet.public[1].cidr_block]
   }
   egress {
     description = "output from MySQL"
@@ -473,7 +475,7 @@ resource "aws_security_group" "rds_sg" {
 
 
 resource "aws_db_subnet_group" "rds_subnet" {
-  depends_on = [ aws_subnet.private ]
+  depends_on = [aws_subnet.private]
   tags       = { Name = "${var.project}-rds_subnet" }
   name       = "${var.project}-rds-subnet-group"
   subnet_ids = [aws_subnet.private[0].id, aws_subnet.private[1].id, aws_subnet.public[0].id, aws_subnet.public[1].id]
@@ -483,41 +485,41 @@ resource "aws_iam_role" "rds_monitoring_role" {
   name = "rds-monitoring-role"
 
   assume_role_policy = jsonencode({
-  Version = "2012-10-17",
-  Statement = [
+    Version = "2012-10-17",
+    Statement = [
       {
         Action = "sts:AssumeRole",
         Effect = "Allow",
         Principal = {
-        Service = "monitoring.rds.amazonaws.com"
+          Service = "monitoring.rds.amazonaws.com"
+        }
       }
-    }
-  ]
-})
+    ]
+  })
 }
 
 resource "aws_iam_policy_attachment" "rds_monitoring_attachment" {
-  name = "rds-monitoring-attachment"
-  roles = [aws_iam_role.rds_monitoring_role.name]
+  name       = "rds-monitoring-attachment"
+  roles      = [aws_iam_role.rds_monitoring_role.name]
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
 resource "aws_db_instance" "mysql" {
-  depends_on = [ aws_db_subnet_group.rds_subnet ]
-  tags                    = { Name = "${var.project}-mysql" }
-  identifier              = var.database_name
-  engine                  = "mysql"
-  instance_class          = "db.t3.micro"
-  allocated_storage       = 20
-  username                = "sjala"
-  password                = "JalaJala123"
-  db_subnet_group_name    = aws_db_subnet_group.rds_subnet.name
-  vpc_security_group_ids  = [aws_security_group.rds_sg.id, aws_security_group.ecs_node_sg.id, aws_security_group.ecs_task.id, aws_security_group.http.id]
-  
+  depends_on             = [aws_db_subnet_group.rds_subnet]
+  tags                   = { Name = "${var.project}-mysql" }
+  identifier             = var.database_name
+  engine                 = "mysql"
+  instance_class         = "db.t3.micro"
+  allocated_storage      = 20
+  username               = "sjala"
+  password               = "JalaJala123"
+  db_subnet_group_name   = aws_db_subnet_group.rds_subnet.name
+  vpc_security_group_ids = [aws_security_group.rds_sg.id, aws_security_group.ecs_node_sg.id, aws_security_group.ecs_task.id, aws_security_group.http.id]
 
-  apply_immediately       = true
-  deletion_protection     = false #
-  db_name                 = var.database_name
+
+  apply_immediately   = true
+  deletion_protection = false #
+  db_name             = var.database_name
   #multi_az = true 
 
   backup_retention_period = 0 # Number of days to retain automated backups
@@ -525,7 +527,7 @@ resource "aws_db_instance" "mysql" {
   #maintenance_window = "mon:04:00-mon:04:30" # Preferred UTC maintenance window
 
   # Enable automated backups
-  skip_final_snapshot = true
+  skip_final_snapshot       = true
   final_snapshot_identifier = "${var.project}-db-snap"
 
   # Enable enhanced monitoring
@@ -534,7 +536,7 @@ resource "aws_db_instance" "mysql" {
 
   # Enable performance insights
   #performance_insights_enabled = true
-  
+
 
 }
 
@@ -580,7 +582,7 @@ resource "aws_security_group" "http" {
 }
 
 resource "aws_lb" "main" {
-  depends_on = [ aws_internet_gateway.main ]
+  depends_on         = [aws_internet_gateway.main]
   name               = "${var.project}-alb"
   load_balancer_type = "application"
   subnets            = aws_subnet.public[*].id
@@ -594,7 +596,7 @@ resource "aws_lb_target_group" "app" {
   port        = 8080
   target_type = "ip"
 
-/*
+  /*
   health_check {
     enabled             = true
     path                = "/actuator/health"
