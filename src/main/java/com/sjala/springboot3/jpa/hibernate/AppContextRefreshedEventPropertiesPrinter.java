@@ -22,7 +22,7 @@ public class AppContextRefreshedEventPropertiesPrinter {
 		env.getPropertySources().stream().filter(
 				ps -> ps instanceof MapPropertySource)
 				.map(ps -> ((MapPropertySource) ps).getSource().keySet()).flatMap(Collection::stream).distinct()
-				.sorted().forEach(key -> logger.info("{}={}", key, env.getProperty(key)));
+				.sorted().forEach(key -> logger.debug("{}={}", key, env.getProperty(key)));
 	}
 
 }

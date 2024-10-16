@@ -2,9 +2,9 @@ package com.sjala.springboot3.jpa.hibernate.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
@@ -25,10 +25,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@JsonIdentityInfo(property = "id",
-generator = ObjectIdGenerators.PropertyGenerator.class)
 @Schema(description = "User Model Information")
-public class User {
+public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -47,20 +45,26 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "location_id")
+    @Schema(accessMode = Schema.AccessMode.READ_WRITE,  description = "User Location Details", example = "1, Main Street")
+    @JsonIgnore  
     private Location location;
 
-    @OneToMany(mappedBy = "user")
-    private List<Review> posts;
 
-    //@JsonBackReference
-    @JsonIgnore
     public Location getLocation() {
         return location;
     }
+      
+    
+    @OneToMany(mappedBy = "customer")
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY,  description = "User reviews list")
+    private List<Review> reviews;
 
-    //@JsonManagedReference
+    
+    @JsonManagedReference
     //alternate is to use JsonIdentityInfo on class
-    public List<Review> getPosts() {
-        return posts;
+    @JsonIgnore
+    public List<Review> getReviews() {
+        return reviews;
     }
+    
 }

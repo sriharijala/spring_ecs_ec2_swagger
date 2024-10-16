@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
@@ -38,20 +39,17 @@ public class Review {
     
     @Schema(description = "Product review comments", example = "Product is awesome")
     private String details;
+
+    @Schema(accessMode = Schema.AccessMode.WRITE_ONLY, description = "Submited by customer id", example = "123")
+    private Long reviewerId;    
     
-    @Schema(description = "User Id submitting the review", example = "1234" )
-    private Long reviewerId;
-
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    @JsonBackReference
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Submited by user", example = "123")
-    @JsonIgnore  
-    private User user;
+    @JoinColumn(name = "customer_id")
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Submitted customer details" )
+    @JsonIgnore
+    private Customer customer;
 
-    //@JsonBackReference
-    @JsonIgnore  //alternate to JsonBackReference
-    public User getUser() {
-        return user;
+    public Customer getCustomer() {
+        return customer;
     }
 }

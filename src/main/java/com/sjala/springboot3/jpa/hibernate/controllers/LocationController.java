@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sjala.springboot3.jpa.hibernate.model.Location;
 import com.sjala.springboot3.jpa.hibernate.model.Review;
-import com.sjala.springboot3.jpa.hibernate.model.User;
+import com.sjala.springboot3.jpa.hibernate.model.Customer;
 import com.sjala.springboot3.jpa.hibernate.services.LocationService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +34,7 @@ public class LocationController {
 	  	      description = "It returns all locaion details.",
 	  	      tags = { "Location" })
     @ApiResponses({
-      @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Review.class), mediaType = "application/json") }),
+      @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Location.class), mediaType = "application/json") }),
       @ApiResponse(responseCode = "204", description = "No locations found", content = { @Content(schema = @Schema()) })
     })
     @GetMapping("/location")
@@ -52,7 +52,7 @@ public class LocationController {
 	  	      description = "Returns location details by location idr",
 	  	      tags = { "Location" })
 	@ApiResponses({
-	    @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Review.class), mediaType = "application/json") }),
+	    @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Location.class), mediaType = "application/json") }),
 	    @ApiResponse(responseCode = "204", description = "No users found", content = { @Content(schema = @Schema()) })
 	  })
     @GetMapping("/location/{id}")
@@ -70,15 +70,15 @@ public class LocationController {
 	  	      description = "Returns all user from a given location",
 	  	      tags = { "Location" })
 	  @ApiResponses({
-	    @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Review.class), mediaType = "application/json") }),
+	    @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Customer.class), mediaType = "application/json") }),
 	    @ApiResponse(responseCode = "204", description = "No users found in location", content = { @Content(schema = @Schema()) })
 	  })    
     @GetMapping("/location/{id}/users")
-    public ResponseEntity<List<User>> getListOfUsersByLocation(@PathVariable Long id) {
+    public ResponseEntity<List<Customer>> getListOfUsersByLocation(@PathVariable Long id) {
         
     		Optional<Location> location = locationService.findLocationById(id);
 
-    		List<User> users = null;
+    		List<Customer> users = null;
     		
         if(location.isPresent()) {
             Location newLocation = location.get();

@@ -5,23 +5,19 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sjala.springboot3.jpa.hibernate.model.Customer;
 import com.sjala.springboot3.jpa.hibernate.model.Review;
-import com.sjala.springboot3.jpa.hibernate.model.User;
-import com.sjala.springboot3.jpa.hibernate.services.PostService;
+import com.sjala.springboot3.jpa.hibernate.services.ReviewService;
 import com.sjala.springboot3.jpa.hibernate.services.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -35,7 +31,7 @@ import jakarta.validation.Valid;
 public class ReviewController {
 
 	@Autowired
-	private PostService postService;
+	private ReviewService postService;
 	
 	@Autowired
 	private UserService userService;
@@ -63,7 +59,7 @@ public class ReviewController {
   	      tags = { "Review" })
     @ApiResponses({
         @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Review.class), mediaType = "application/json") }),
-        @ApiResponse(responseCode = "404", description = "The Post with given Id was not found.", content = { @Content(schema = @Schema()) })
+        @ApiResponse(responseCode = "204", description = "The Post with given Id was not found.", content = { @Content(schema = @Schema()) })
       })
     @GetMapping("review/{id}")
     public ResponseEntity<Optional<Review>> getLocationById(@PathVariable Long id) {
@@ -83,6 +79,7 @@ public class ReviewController {
 	  	      tags = { "Review" })
     @ApiResponses({
         @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = Review.class), mediaType = "application/json") }),
+        @ApiResponse(responseCode = "204", description = "The customer with given Id was not found.", content = { @Content(schema = @Schema()) }),
         @ApiResponse(responseCode = "500", description = "Something went wrong, please retry.", content = { @Content(schema = @Schema()) })
       })
 	@PostMapping(path = "/review",  produces = "application/json", consumes = "application/json")
@@ -95,13 +92,18 @@ public class ReviewController {
 	{
 		
 		 Optional<Review> postedReview = null;
+		 
+		 
 		 review.setPostDate(LocalDateTime.now());
-		 Optional<User> userPosted = userService.getUserById(review.getReviewerId());
-		 if(userPosted.get() != null) {
-			 review.setUser(userPosted.get());
+		 Optional<Customer> userPosted = userService.getUserById(review.getReviewerId());
+		 if(!userPosted.isEmpty()) {
+			 review.setCustomer(userPosted.get());
 		 	 postedReview = postService.addReview(review);
-		 } 
-
+		 } else {
+			 return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+		 }
+		
+		 
 		 if(postedReview == null)
 	  	      return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
 	  	    else 

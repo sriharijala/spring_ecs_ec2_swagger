@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Location Id", example = "123")
     private Long id;
 
@@ -35,10 +36,10 @@ public class Location {
 
     @Schema(description = "list of user at the location")
     @OneToMany(mappedBy = "location")
-    private List<User> users;
+    private List<Customer> users;
 
     @JsonManagedReference
-    public List<User> getUsers() {
+    public List<Customer> getUsers() {
         return users;
     }
 }
