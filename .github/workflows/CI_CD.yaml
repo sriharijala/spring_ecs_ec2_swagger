@@ -109,7 +109,7 @@ jobs:
           REPOSITORY_URL:  ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
           SERVICE_NAME: "user-reviews"
-          TASK_DEFINITION_NAME: "${SERVICE_NAME}-app"
+          TASK_DEFINITION_NAME: "user-reviews-app"
         run: |
           echo "ECR_REGISTRY : $ECR_REGISTRY"
           echo "REGION       : ${{vars.REGION}}"
