@@ -6,7 +6,7 @@ This guide describes a way create an AWS ECS Cluster on EC2 with cuurent verion 
 
 ### Overall architecture
 
-![Git Hub Secretes](../images/UserReviews_AWS_Architect.png)
+![Git Hub Secretes](images/UserReviews_AWS_Architect.png)
 
 ### Resources created with Terraform:
  - VPC with public & Private subnets
@@ -33,10 +33,10 @@ Two options to deploy
 ### Git Hub Secrets and Variables
 
  - Setup the secrets to login to AWS account
-    ![Git Hub Secretes](../images/GitHubSecrets.png)
+    ![Git Hub Secretes](images/GitHubSecrets.png)
  
  - Application variables
-    ![Git Hub variables](../images/GitHubVariables.png)
+    ![Git Hub variables](images/GitHubVariables.png)
 
 ### Deploying docker desktop
 
