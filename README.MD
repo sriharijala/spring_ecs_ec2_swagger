@@ -4,7 +4,7 @@
 
 This guide describes a way create an AWS ECS Cluster on EC2 with cuurent verion in 2024. The sample application uses SpringBoot with JPA for web service, Swagger to test the web serveice, MYSQL Database for data storage backend, Terraform for AWS resource provisoning and deployment  Infrastructure As Code, and GitHub worklfow. The purpose of this article is to showcase a way to asemble all componenet to deploy a scalable web service in ECS Cluster on EC2 instances.
 
-### Overall architecture
+### Architecture
 
 ![Git Hub Secretes](images/UserReviews_AWS_Architect.svg)
 
