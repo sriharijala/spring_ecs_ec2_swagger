@@ -42,9 +42,9 @@ Two options to deploy
 
 #### Docker commands
 
-- Build Docker image                            : ``docker build -t sjala/user-reviews:1.0 .``
-- Push docker image to Docker Hub               : ``docker push sjala/user-reviews:1.0``
-- Deploy in docker desktop 			      : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
+- Build Docker image               : ``docker build -t sjala/user-reviews:1.0 .``
+- Push docker image to Docker Hub  : ``docker push sjala/user-reviews:1.0``
+- Deploy in docker desktop 		   : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
 
 ### Deploying to AWS
 
@@ -57,10 +57,10 @@ Two options to deploy
 #### How to use
  - Clone the GitRpo
  - Create ECR Repo
- - [Update the Terraform variables](#### Terraform variables)
+ - ![Update the Terraform variables](#### Terraform variables)
  - Run the GitHub workflow to prepare image in your AWS ECR
- - [Provision AWS Resources and deploy](### Provision AWS resource using Terraform)
- - Access Web Service at : http://{alb_url}:8080/
+ - ![Provision AWS Resources and deploy](### Provision AWS resource using Terraform)
+ - Access Web Service at Terraform output : {alb_url}
 
 #### Terraform variables
  - Following variables in variables.tf can be modified as needed
