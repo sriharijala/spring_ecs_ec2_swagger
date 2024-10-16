@@ -69,7 +69,14 @@ Two options to deploy
        - (Note: Please use the system environment variables or secrte stores DB credentials)
     
 
-#### GitHub workflow can be customized : CI_CD_ECS_EC2_Deploment.yml
+#### GitHub Details
+
+- Workflow can be customized : <a href="https://github.com/sriharijala/spring_ecs_ec2_swagger/blob/main/.github/workflows/CI_CD_ECS_EC2_Deploment.yaml">CI/CD ECS EC2 Deployment</a>
+
+- GitHub project: <a href="https://github.com/sriharijala/spring_ecs_ec2_swagger">spring_ecs_ec2_swagger</a>
+
+- Branches to build:
+      Branch Specifier: */main 
 
 ### Running Terraform 
  - Change to directory iac/ecs_ecs 
@@ -96,7 +103,7 @@ Two options to deploy
 
 ## Helpful commands
 
-### Terrform commands ###
+### Terrform commands
 - Initialize terraform                           : ``terraform init``
 - Execuate the plan                              : ``terraform plan``
 - Create the infrastucture with auto approve     : ``terraform plan --auto-approve=true``
@@ -129,33 +136,10 @@ Two options to deploy
   - Find the container's IP address with the following docker inspect command:
          ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
 
-
    
-###Create Jenkins pipeline
-
-```
-- job name: eks-cluster-with-monitoring-anteon
-- job type: pipeline
-- Description: The production pipeline deploys the Dearing Veterinairan Clinic Java-based web application consisting of 11 microservices to the Amazon EKS cluster with Helm. We'll monitor Amazon EKS cluster with Anteon.
-In the this stage, Whenever the developers push their codes to the GitHub repository, the Jenkins pipeline will run automatically thanks to the GitHub webhook and automatically update our Java-based application running on the web.
-- Discard old builds: Days to keep builds=2, Max of builds to keep=2.
-- GitHub project: Project url=https://github.com/cmakkaya/eks-monitoring-with-anteon
-- Build Triggers:
-      Build periodically: 
-- Source Code Management: Git
-      Repository URL: https://github.com/cmakkaya/eks-monitoring-with-anteon.git
-- Branches to build:
-      Branch Specifier: */main 
-- Pipeline:
-      Script Path: jenkins/jenkinsfile-microservice-app-production
-```
-
 ### Amazon Linux commands
  - sudo yum -y install telnet
  - sudo yum -y install mysql
-
-
-ECS Conatiner login
 
 ### ECS Clusters Commands
 - List ECS Clsuters: aws ecs list-clusters
@@ -169,6 +153,7 @@ ECS Conatiner login
  - List all users: select User,Host from mysql.user;
  - Grant access to user from any host: ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
 
+### AWS Commands
 aws ecs execute-command --cluster review-cluster --task 77063c453c9c4feb89b085a1a6988b28 --container review-app --interactive --command "/bin/bash"
 
 ### Reference Documentation
