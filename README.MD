@@ -39,9 +39,9 @@ Two options to deploy
     ![Git Hub variables](images/GitHubVariables.png)
 
 ### Deploying docker desktop
+- Update variables used in docker-compose.yml in file - user-reviews.env 
 
-#### Docker commands
-
+#### Run Docker commands
 - Build Docker image               : ``docker build -t sjala/user-reviews:1.0 .``
 - Push docker image to Docker Hub  : ``docker push sjala/user-reviews:1.0``
 - Deploy in docker desktop 		   : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
