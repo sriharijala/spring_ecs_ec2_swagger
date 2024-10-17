@@ -120,7 +120,9 @@ jobs:
         env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
-        run: terraform apply --auto-approve=true -var user_reviews_image=$ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG
+        run: |
+           cd iac/ecs_ec2
+           terraform apply --auto-approve=true -var user_reviews_image=$ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG
 
             
       
