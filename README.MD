@@ -1,12 +1,19 @@
-# Web Service development with SrpingBoot, Swagger, AWS ECS EC2, Terraform, GitHub Workflow
+# Web Service development with SpringBoot, Swagger, AWS ECS EC2, Terraform, GitHub Workflow
 
 ## Overview
 
-This guide describes a way create an AWS ECS Cluster on EC2 with cuurent verion in 2024. The sample application uses SpringBoot with JPA for web service, Swagger to test the web serveice, MYSQL Database for data storage backend, Terraform for AWS resource provisoning and deployment  Infrastructure As Code, and GitHub worklfow. The purpose of this article is to showcase a way to asemble all componenet to deploy a scalable web service in ECS Cluster on EC2 instances.
+This guide describes a way to deploy web services in a AWS ECS Cluster on EC2. The sample service built with SpringBoot with JPA, Swagger to test the web service, MYSQL Database for data storage, GitHub workflow, Terraform for AWS resource provisioning and deployment, and GitHub workflow. The purpose of this article is to showcase a way to assemble all components to deploy a scalable web service in ECS Cluster on EC2 instances.
+
+### Frameworks
+ - SpringBoot popular choice for Java developers
+ - Swagger enables Top-down approach, or design-first
+ - Terraform enables ease of Cloud deployment
+ - GitHub workflow enables to develop CI/CD pipelines from packing to deploying
+
 
 ### Architecture
 
-![Git Hub Secretes](images/UserReviews_AWS_Architect.svg)
+![Git Hub Secretes](images/UserReviewsArchitecture2Subnets.svg)
 
 ### Final outcome
 - Web Service Swagger UI
@@ -35,7 +42,7 @@ This guide describes a way create an AWS ECS Cluster on EC2 with cuurent verion 
 
 Two options to deploy 
   -- Docker desktop
-  -- AWS ECS with conatiners running on EC2. (Note: With slight changes can be deployed to FARGATE and EKS)
+  -- AWS ECS with containers running on EC2. (Note: With slight changes can be deployed to FARGATE and EKS)
 
 ### Git Hub Secrets and Variables
 
@@ -82,7 +89,7 @@ Two options to deploy
           <a href="docs/AWS_ECR_image.jpg">
      - database_username  : MySQL DB User name 
      - database_password  : MYSQL DB Uer password 
-       - (Note: Please use the system environment variables or secrte stores DB credentials)
+       - (Note: Please use the system environment variables or secret stores DB credentials)
     
 
 #### GitHub Details
@@ -96,10 +103,10 @@ Two options to deploy
 
 ### Provision AWS resource using Terraform 
  - Change to directory iac/ecs_ecs 
- - Intilize Terraform                      
+ - Intialize Terraform                      
      ```terraform init```
 
- - Run the Tearrform plan             
+ - Run the Terraform plan             
      ```terraform plan```
 
  - Run apply the Terraform with auto approve
@@ -108,7 +115,7 @@ Two options to deploy
  - Run to dismantle the AWS infrastructure     
      ```terraform destroy --auto-approve=true```
 
-#### Outputs from Tearrform
+#### Outputs from Terraform
  - The ALB load balancer URL and mysql Database URL.
  - alb_url = ex: "user-reviews-alb-1057870179.us-east-1.elb.amazonaws.com"
  - mysql_db_url = ex: "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com:3306"
@@ -120,14 +127,14 @@ Two options to deploy
 
 ## Helpful commands
 
-### Terrform commands
+### Terraform commands
 - Initialize terraform                           : ``terraform init``
-- Execuate the plan                              : ``terraform plan``
-- Create the infrastucture with auto approve     : ``terraform plan --auto-approve=true``
+- Execute the plan                              : ``terraform plan``
+- Create the infrastructure with auto approve     : ``terraform plan --auto-approve=true``
 - Get teh private key to ssh to ec2BationKey     : ``terraform output -raw ec2BationKey``
-- Remove the entire infrastucture auto approve   : ``terraform destroy --auto-approve=true``
+- Remove the entire infrastructure auto approve   : ``terraform destroy --auto-approve=true``
 - List all resources crated                      : ``terraform state list``
-- Rmove selective resource                       : ``terraform destroy --target resource_name --auto-approve=true``
+- Remove selective resource                       : ``terraform destroy --target resource_name --auto-approve=true``
 
 ### Terraform Knowledge base
 - <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition">How to define multiple services in task definition</a> 
@@ -159,14 +166,14 @@ Two options to deploy
  - sudo yum -y install mysql
 
 ### ECS Clusters Commands
-- List ECS Clsuters: aws ecs list-clusters
+- List ECS Clusters: aws ecs list-clusters
 - List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:{ACOOUNT_ID}:cluster/user-reviews"
 - List tasks: aws ecs list-tasks --cluster user-reviews
-- Login to conatiner: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
+- Login to container: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
 
 ### MySQL
- - Login to MySQL from EC2 Insatnce : mysql -usjala -pJalaJala123 -hsocialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com -P3306
- - Change schema: use schemaname
+ - Login to MySQL from EC2 Instance : mysql -usjala -pJalaJala123 -hsocialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com -P3306
+ - Change schema: use schema name
  - List all users: select User,Host from mysql.user;
  - Grant access to user from any host: ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
 
