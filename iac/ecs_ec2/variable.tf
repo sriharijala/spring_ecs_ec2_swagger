@@ -21,11 +21,6 @@ variable "environment" {
   default = "prod"
 }
 
-variable "bastion_instance_type" {
-  type    = string
-  default = "t2.micro"
-}
-
 variable "database_name" {
   type    = string
   default = "socialmedia"
@@ -53,8 +48,6 @@ variable "inbound_ports" {
 
 variable "database_host" {
   type    = string
-  default = "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com"
-
 }
 
 variable "user_reviews_image" {
