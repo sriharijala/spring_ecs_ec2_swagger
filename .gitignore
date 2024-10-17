@@ -34,3 +34,7 @@ build/
 
 ### VS Code ###
 .vscode/
+iac/ecs_ec2/.terraform.tfstate.lock.info
+iac/ecs_ec2/.terraform.lock.hcl
+terraform.tfstate
+iac/ecs_ec2/terraform.tfstate.backup

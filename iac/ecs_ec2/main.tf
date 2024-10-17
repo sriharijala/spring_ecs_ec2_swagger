@@ -4,11 +4,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  profile = "default"
-  region  = var.AWS_REGION
-}
-
 # --- Create VPC ---
 
 data "aws_availability_zones" "available" { state = "available" }
@@ -322,13 +317,13 @@ resource "aws_ecs_task_definition" "app" {
     memory             = 256,
     environment = [
       { name = "Environment", value = "${var.environment}" },
-      { name = "DB_HOST", value = "${var.database_host}" },
+      { name = "DB_HOST", value = "${aws_db_instance.mysql.address}" },
       { name = "DB_PORT", value = "3306" },
       { name = "DB_DATABASE", value = "${var.database_name}" },
       { name = "DB_USER", value = "${var.database_username}" },
       { name = "DB_PASSWORD", value = "${var.database_password}" },
       { name = "APP_CONFIG_DIR", value = "/usr/app" },
-      { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${var.database_host}:3306/socialmedia" }
+      { name = "SPRING_DATASOURCE_URL", value = "jdbc:mysql://${aws_db_instance.mysql.address}:3306/socialmedia" }
     ]
 
     logConfiguration = {
@@ -562,12 +557,4 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-output "alb_url" {
-  value = format("%s%s%s", "http://", aws_lb.main.dns_name,":8080/swagger-ui/index.html")
-  
-}
-
-output "mysql_db_url" {
-  value = aws_db_instance.mysql.endpoint
-}
 
