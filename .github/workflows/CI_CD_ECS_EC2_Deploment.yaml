@@ -106,5 +106,16 @@ jobs:
       - name: Setup Terraform
         id: setup-terraform
         uses: hashicorp/setup-terraform@v2
+        
+      - name: Update the ECR Cluster with new image
+        id: dev-
+        env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            IMAGE_TAG: ${{ steps.get-imagetag.outputs.imagetag }}
+        run: |
+            cd iac/ecs_ec2
+            terraform init
+            terraform apply --auto-approve=true -var user_reviews_image=$ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG
+
             
       
