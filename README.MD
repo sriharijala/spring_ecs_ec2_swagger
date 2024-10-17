@@ -72,6 +72,7 @@ Two options to deploy
 #### Terraform variables
  - Following variables in variables.tf can be modified as needed
      - environment        : environment tag
+     - AWS Region         : AWS_REGION
      - key_name           : AWS Key pair
      - aws_ecr_app_image  : Image Id from ECR registry. it has both the registry and image version 
        - Ex       : AWS_ACCCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/sjala/user-reviews:622d47c-2024-10-16-19-08
@@ -109,8 +110,9 @@ Two options to deploy
 
 #### Outputs from Tearrform
  - The ALB load balancer URL and mysql Database URL.
-    alb_url = "user-reviews-alb-1057870179.us-east-1.elb.amazonaws.com"
-    mysql_db_url = "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com:3306"
+ - alb_url = ex: "user-reviews-alb-1057870179.us-east-1.elb.amazonaws.com"
+ - mysql_db_url = ex: "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com:3306"
+ - mysql_host = ex: "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com"
 
 
 ## End point URLS
