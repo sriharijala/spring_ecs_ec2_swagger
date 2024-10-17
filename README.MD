@@ -160,7 +160,7 @@ Two options to deploy
 
 ### ECS Clusters Commands
 - List ECS Clsuters: aws ecs list-clusters
-- List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:307946673854:cluster/user-reviews"
+- List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:{ACOOUNT_ID}:cluster/user-reviews"
 - List tasks: aws ecs list-tasks --cluster user-reviews
 - Login to conatiner: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
 
