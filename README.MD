@@ -11,6 +11,7 @@ This guide describes a way create an AWS ECS Cluster on EC2 with cuurent verion 
 ### Final outcome
 - Web Service Swagger UI
 ![Web Service Swagger UI](images/FinalUI.png)
+- <a href="images/api-docs.json">Swagger Definition</a>
 
 ### Resources created with Terraform:
  - VPC with public & Private subnets
