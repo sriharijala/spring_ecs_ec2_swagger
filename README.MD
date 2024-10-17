@@ -43,7 +43,8 @@ This guide describes a way to deploy web services in a AWS ECS Cluster on EC2. T
  - Login to Amazon ECR
  - Publish image to ECR
 
-#### GitHub workflow 
+
+#### GitHub workflow (CI/CD ECS EC2 Deployment.yaml)
  ![Git Hub SecretesWorkflow](images/GitHubWorkflow.svg)
 
 #### GitHub pipeline 
