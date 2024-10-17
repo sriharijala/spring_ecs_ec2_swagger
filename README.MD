@@ -15,12 +15,17 @@ This guide describes a way to deploy web services in a AWS ECS Cluster on EC2. T
 
 ![Git Hub Secretes](images/UserReviewsArchitecture2Subnets.svg)
 
+- Note: To avoid NAT gateway cost, the services deployed in public subnet instead of private subnet.
+
 ### Final outcome
 - Web Service Swagger UI
 ![Web Service Swagger UI](images/FinalUI.png)
 - api-docs - http://server:port/context-path/v3/api-docs.yaml
 - API Document - http://server:port/context-path/v3/api-docs.yaml
 
+### Web Service functionality
+ - Services to manage users
+ - Services to manage reviews
 
 ### Resources created with Terraform:
  - VPC with public & Private subnets
