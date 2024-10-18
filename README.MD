@@ -177,10 +177,14 @@ There are two options for deployment
  - sudo yum -y install mysql
 
 **ECS Clusters Commands**
-- List ECS Clusters: aws ecs list-clusters
-- List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:{ACOOUNT_ID}:cluster/user-reviews"
-- List tasks: aws ecs list-tasks --cluster user-reviews
-- Login to container: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
+- List ECS Clusters: 
+   -  ```aws ecs list-clusters```
+- List LCuster Services:  
+    - ```aws ecs list-services --cluster "arn:aws:ecs:us-east-1:{ACOOUNT_ID}:cluster/user-reviews"```
+- List tasks: 
+    - ```aws ecs list-tasks --cluster user-reviews```
+- Login to container: 
+    - ```aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"```
 
 **MySQL Commands**
  - Login to MySQL from EC2 Instance : mysql -u<DATABASE_USER_ID> -p<PASSWORD> -h<DB_HOST> -P<DB_PORT>
