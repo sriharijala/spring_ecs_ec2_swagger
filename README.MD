@@ -72,7 +72,7 @@ There are two options for deployment
 
 **How to use**
  - Configure AWS CLI
- - Clone the GitRpo
+ - Clone the GitRepo
  - Create ECR Repo
  - Update the Terraform variables (#### Terraform variables)
  - Run the GitHub workflow to prepare image in your AWS ECR
@@ -149,21 +149,28 @@ There are two options for deployment
 **Push Docker image to ECR**
  - Login to AWS ECR
  - Create a repo in ECR and get AWS repo url from aws**
- - Set environment variables**
-    ``export REPO=aws_ecr_repo_url``
-    ``aws ecr get-login-password | docker login --username AWS --password-stdin $REPO``
+ - Set environment variables
+    
+    ```
+    export REPO=aws_ecr_repo_url
+    aws ecr get-login-password | docker login --username AWS --password-stdin $REPO
+    ```
+
  - Note : In case Windows, use set REPO=aws_ecr_repo_url and reference variable with %REPO%
 
 **Pull docker image & push to our ECR**
-    ``aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin``
-    ``docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest``
-    ``docker push $REPO:latest``
+    ```aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin```
+    ```docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest```
+    ```docker push $REPO:latest```
 
 **SSH into Docker container**
-  - List the containers running on the system: 
-         ```docker ps```
+  - List the containers running on the system:
+
+    ```docker ps```
+
   - Find the container's IP address with the following docker inspect command:
-         ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
+
+    ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
    
 **Amazon Linux commands**
  - sudo yum -y install telnet
