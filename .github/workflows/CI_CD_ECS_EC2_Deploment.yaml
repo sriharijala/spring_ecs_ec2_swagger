@@ -108,7 +108,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
     
       - name: Terraform Init
-        run: 
+        run: |
             cd iac/ecs_ec2
             terraform init
 
