@@ -197,7 +197,9 @@ There are two options for deployment
  - Login to MySQL from EC2 Instance : mysql -u<DATABASE_USER_ID> -p<PASSWORD> -h<DB_HOST> -P<DB_PORT>
  - Change schema: use schema name
  - List all users: select User,Host from mysql.user;
- - Grant access to user from any host: ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
+ - Grant access to user from any host: 
+ 
+    ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
 
 **AWS Commands**
 aws ecs execute-command --cluster review-cluster --task 77063c453c9c4feb89b085a1a6988b28 --container review-app --interactive --command "/bin/bash"
