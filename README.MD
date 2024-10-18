@@ -159,8 +159,11 @@ There are two options for deployment
  - Note : In case Windows, use set REPO=aws_ecr_repo_url and reference variable with %REPO%
 
 **Pull docker image & push to our ECR**
+
     ```aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin```
+
     ```docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest```
+
     ```docker push $REPO:latest```
 
 **SSH into Docker container**
