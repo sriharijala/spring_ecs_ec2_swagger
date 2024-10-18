@@ -24,11 +24,11 @@ This guide outlines a method for deploying web services within AWS ECS Cluster o
 - api-docs - http://server:port/context-path/v3/api-docs.yaml
 - API Document - http://server:port/context-path/v3/api-docs.yaml
 
-### Web Service functionality
+**Web Service functionality**
  - Services to manage users
  - Services to manage reviews
 
-### Resources created with Terraform:
+**Resources created with Terraform**
  - VPC with public & Private subnets
  - Internet Gateway to connect to the global Internet from public subnet
  - Security groups for EC2 Node & ECS Service
@@ -37,7 +37,7 @@ This guide outlines a method for deploying web services within AWS ECS Cluster o
  - ECS cluster with task and service definition
  - Load Balancer to public access & scale ECS Service
 
-### GitHub workflow handles
+**GitHub workflow handles**
  - Code checkout on events
  - Prepare Maven builds
  - Custom tag each build with code check-in hash and the time stamp
@@ -45,10 +45,10 @@ This guide outlines a method for deploying web services within AWS ECS Cluster o
  - Publish image to ECR
 
 
-#### GitHub CI/CD workflow (ECS EC2 Deployment.yaml)
+**GitHub CI/CD workflow (ECS EC2 Deployment.yaml)**
  ![Git Hub SecretesWorkflow](images/GitHubWorkflow.png)
 
-#### GitHub pipeline 
+**GitHub pipeline**
  ![Git Hub Pipeline](images/GitHubPipeline.png)
 
 ## Preparation
@@ -57,40 +57,32 @@ There are two options for deployment
   - Docker desktop
   - AWS ECS, utilizing containers on EC2 instances. (Note: With slight changes deployment can  also be configured for Fargate and EKS)
 
-### Git Hub Secrets and Variables
+### Deploying to Docker desktop
+- Update environment variables used by docker-compose.yml in file - user-reviews.env 
 
- - Setup the secrets to login to AWS account
-    ![Git Hub Secretes](images/GitHubSecrets.png)
- 
- - Application variables
-    ![Git Hub variables](images/GitHubVariables.png)
-
-### Deploying docker desktop
-- Update variables used in docker-compose.yml in file - user-reviews.env 
-
-#### Run Docker commands
+**Run Docker commands**
 - Build Docker image               : ``docker build -t sjala/user-reviews:1.0 .``
 - Push docker image to Docker Hub  : ``docker push sjala/user-reviews:1.0``
 - Deploy in docker desktop 		   : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
-- Docker Desktop application 
+- Docker Desktop shall look like this 
     ![Git Hub variables](images/DockerDesktop.png)
 
 
 ### Deploying to AWS
 
-#### Configuring AWS CLI
+**How to use**
  - Configure AWS CLI
-     - ``$ aws configure``
-     - ``AWS Access Key ID [None]: <enter-access-key-id>``
-     - ``AWS Secret Access Key [None]: <enter-access-key>``
-
-#### How to use
  - Clone the GitRpo
  - Create ECR Repo
  - Update the Terraform variables (#### Terraform variables)
  - Run the GitHub workflow to prepare image in your AWS ECR
  - Provision AWS Resources and deploy (### Provision AWS resource using Terraform)
  - Access Web Service at Terraform output : {alb_url}
+
+**Configuring AWS CLI**
+ - ``$ aws configure``
+ - ``AWS Access Key ID [None]: <enter-access-key-id>``
+ - ``AWS Secret Access Key [None]: <enter-access-key>``
 
 #### Terraform variables
  - Following variables in variables.tf can be modified as needed
@@ -119,7 +111,7 @@ There are two options for deployment
 
 ### Provision AWS resource using Terraform 
  - Change to directory iac/ecs_ecs 
- - Intialize Terraform                      
+ - Initialize Terraform                      
      ```terraform init```
 
  - Run the Terraform plan             
@@ -141,21 +133,18 @@ There are two options for deployment
 ## End point URLS
 - Swagger end point URL from Terraform output : {alb_url}
 
-## Helpful commands
+## Helpful commands cheat sheet
 
 ### Terraform commands
 - Initialize terraform                           : ``terraform init``
-- Execute the plan                              : ``terraform plan``
-- Create the infrastructure with auto approve     : ``terraform plan --auto-approve=true``
-- Get teh private key to ssh to ec2BationKey     : ``terraform output -raw ec2BationKey``
-- Remove the entire infrastructure auto approve   : ``terraform destroy --auto-approve=true``
+- Execute the plan                               : ``terraform plan``
+- Create the infrastructure with auto approve    : ``terraform plan --auto-approve=true``
+- Remove the entire infrastructure auto approve  : ``terraform destroy --auto-approve=true``
 - List all resources crated                      : ``terraform state list``
-- Remove selective resource                       : ``terraform destroy --target resource_name --auto-approve=true``
+- Remove selective resource                      : ``terraform destroy --target resource_name --auto-approve=true``
 
 ### Terraform Knowledge base
 - <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition">How to define multiple services in task definition</a> 
-
-
 
 ### Push Docker image to ECR
 
@@ -188,7 +177,7 @@ There are two options for deployment
 - Login to container: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
 
 ### MySQL
- - Login to MySQL from EC2 Instance : mysql -usjala -pJalaJala123 -hsocialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com -P3306
+ - Login to MySQL from EC2 Instance : mysql -u<DATABASE_USER_ID> -p<PASSWORD> -h<DB_HOST> -P<DB_PORT>
  - Change schema: use schema name
  - List all users: select User,Host from mysql.user;
  - Grant access to user from any host: ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
