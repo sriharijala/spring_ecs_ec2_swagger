@@ -102,17 +102,5 @@ jobs:
             docker build -t $ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG .
             docker push $ECR_REGISTRY/${{vars.USER_REPOSITORY}}:$IMAGE_TAG
        
-       # Install the selected version of Terraform CLI 
-      - name: Setup Terraform
-        id: setup-terraform
-        uses: hashicorp/setup-terraform@v2
-    
-      - name: Terraform Init
-        run: |
-            cd iac/ecs_ec2
-            terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
      
       
