@@ -84,7 +84,7 @@ There are two options for deployment
  - ``AWS Access Key ID [None]: <enter-access-key-id>``
  - ``AWS Secret Access Key [None]: <enter-access-key>``
 
-#### Terraform variables
+**Terraform variables**
  - Following variables in variables.tf can be modified as needed
      - environment        : environment tag
      - AWS Region         : AWS_REGION
@@ -100,7 +100,7 @@ There are two options for deployment
        - (Note: Please use the system environment variables or secret stores DB credentials)
     
 
-#### GitHub Details
+**GitHub Details**
 
 - Workflow can be customized : <a href="https://github.com/sriharijala/spring_ecs_ec2_swagger/blob/main/.github/workflows/CI_CD_ECS_EC2_Deploment.yaml">CI/CD ECS EC2 Deployment</a>
 
@@ -109,7 +109,7 @@ There are two options for deployment
 - Branches to build:
       Branch Specifier: */main 
 
-### Provision AWS resource using Terraform 
+**Provision AWS resource using Terraform**
  - Change to directory iac/ecs_ecs 
  - Initialize Terraform                      
      ```terraform init```
@@ -123,19 +123,19 @@ There are two options for deployment
  - Run to dismantle the AWS infrastructure     
      ```terraform destroy --auto-approve=true```
 
-#### Outputs from Terraform
+**Outputs from Terraform**
  - The ALB load balancer URL and mysql Database URL.
  - alb_url = ex: "user-reviews-alb-1057870179.us-east-1.elb.amazonaws.com"
  - mysql_db_url = ex: "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com:3306"
  - mysql_host = ex: "socialmedia.cbigw6wa0drf.us-east-1.rds.amazonaws.com"
 
 
-## End point URLS
+**End point URLS**
 - Swagger end point URL from Terraform output : {alb_url}
 
 ## Helpful commands cheat sheet
 
-### Terraform commands
+**Terraform commands**
 - Initialize terraform                           : ``terraform init``
 - Execute the plan                               : ``terraform plan``
 - Create the infrastructure with auto approve    : ``terraform plan --auto-approve=true``
@@ -143,46 +143,45 @@ There are two options for deployment
 - List all resources crated                      : ``terraform state list``
 - Remove selective resource                      : ``terraform destroy --target resource_name --auto-approve=true``
 
-### Terraform Knowledge base
+**Terraform Knowledge base**
 - <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition">How to define multiple services in task definition</a> 
 
-### Push Docker image to ECR
-
-#### Login to AWS ECR
-##### Note : In case Windows, use set REPO=aws_ecr_repo_url and reference variable with %REPO%
-##### Create a repo in ECR and get AWS repo url from aws
+**Push Docker image to ECR**
+ - Login to AWS ECR
+ - Create a repo in ECR and get AWS repo url from aws**
+ - Set environment variables**
     ``export REPO=aws_ecr_repo_url``
     ``aws ecr get-login-password | docker login --username AWS --password-stdin $REPO``
-    
-##### Pull docker image & push to our ECR
+ - Note : In case Windows, use set REPO=aws_ecr_repo_url and reference variable with %REPO%
+
+**Pull docker image & push to our ECR**
     ``aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin``
     ``docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest``
     ``docker push $REPO:latest``
 
-##### SSH into Docker container
+**SSH into Docker container**
   - List the containers running on the system: 
          ```docker ps```
   - Find the container's IP address with the following docker inspect command:
          ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
-
    
-### Amazon Linux commands
+**Amazon Linux commands**
  - sudo yum -y install telnet
  - sudo yum -y install mysql
 
-### ECS Clusters Commands
+**ECS Clusters Commands**
 - List ECS Clusters: aws ecs list-clusters
 - List LCuster Services:  aws ecs list-services --cluster "arn:aws:ecs:us-east-1:{ACOOUNT_ID}:cluster/user-reviews"
 - List tasks: aws ecs list-tasks --cluster user-reviews
 - Login to container: aws ecs execute-command --cluster cluster-name --task task-id --container container-name --interactive --command "/bin/bash"
 
-### MySQL
+**MySQL Commands**
  - Login to MySQL from EC2 Instance : mysql -u<DATABASE_USER_ID> -p<PASSWORD> -h<DB_HOST> -P<DB_PORT>
  - Change schema: use schema name
  - List all users: select User,Host from mysql.user;
  - Grant access to user from any host: ```GRANT ALL PRIVILEGES ON *.* TO 'USERNAME'@'%' IDENTIFIED BY 'PASSWORD' WITH GRANT OPTION;```
 
-### AWS Commands
+**AWS Commands**
 aws ecs execute-command --cluster review-cluster --task 77063c453c9c4feb89b085a1a6988b28 --container review-app --interactive --command "/bin/bash"
 
 ### Reference Documentation
