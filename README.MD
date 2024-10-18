@@ -40,7 +40,7 @@ This guide outlines a method for deploying web services within AWS ECS Cluster o
 **GitHub workflow handles**
  - Code checkout on events
  - Prepare Maven builds
- - Custom tag each build with code check-in hash and the time stamp
+ - Custom tag each build with git hash and the timestamp
  - Login to Amazon ECR
  - Publish image to ECR
 
