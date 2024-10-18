@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide describes a way to deploy web services in a AWS ECS Cluster on EC2. The sample service built with SpringBoot with JPA, Swagger to test the web service, MYSQL Database for data storage, GitHub workflow, Terraform for AWS resource provisioning and deployment, and GitHub workflow. The purpose of this article is to showcase a way to assemble all components to deploy a scalable web service in ECS Cluster on EC2 instances.
+This guide outlines a method for deploying web services within AWS ECS Cluster on EC2 instances. The sample service is developed using Spring Boot with JPA, incorporating Swapper for API testing, and utilizing a MySQL database for data storage. Additionally, it leverages GitHub workflows for CI/CD, along with Terraform for AWS resource provisioning and deployment. The purpose of this article is to demonstrate how to integrate these components to deploy a scalable web service im an ECS cluster with EC2 instances.
+
 
 ### Frameworks
  - SpringBoot popular choice for Java developers
@@ -52,9 +53,9 @@ This guide describes a way to deploy web services in a AWS ECS Cluster on EC2. T
 
 ## Preparation
 
-Two options to deploy 
-  -- Docker desktop
-  -- AWS ECS with containers running on EC2. (Note: With slight changes can be deployed to FARGATE and EKS)
+There are two options for deployment 
+  - Docker desktop
+  - AWS ECS, utilizing containers on EC2 instances. (Note: With slight changes deployment can  also be configured for Fargate and EKS)
 
 ### Git Hub Secrets and Variables
 
@@ -71,6 +72,9 @@ Two options to deploy
 - Build Docker image               : ``docker build -t sjala/user-reviews:1.0 .``
 - Push docker image to Docker Hub  : ``docker push sjala/user-reviews:1.0``
 - Deploy in docker desktop 		   : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
+- Docker Desktop application 
+    ![Git Hub variables](images/DockerDesktop.png)
+
 
 ### Deploying to AWS
 
