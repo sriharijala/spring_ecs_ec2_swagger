@@ -160,11 +160,11 @@ There are two options for deployment
 
 **Pull docker image & push to our ECR**
 
-    ```aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin```
-
-    ```docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest```
-
-    ```docker push $REPO:latest```
+    ```
+    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin
+    docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest
+    docker push $REPO:latest
+    ```
 
 **SSH into Docker container**
   - List the containers running on the system:
@@ -176,8 +176,10 @@ There are two options for deployment
     ```docker inspect -f "{{ .NetworkSettings.IPAddress }}" [container-name-or-id]```
    
 **Amazon Linux commands**
- - sudo yum -y install telnet
- - sudo yum -y install mysql
+  ```
+  sudo yum -y install telnet
+  sudo yum -y install mysql
+  ```
 
 **ECS Clusters Commands**
 - List ECS Clusters: 
