@@ -160,11 +160,9 @@ There are two options for deployment
 
 **Pull docker image & push to our ECR**
 
-    ```
-    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin
+    ```aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin
     docker tag sjala/user-reviews:latest $REPO/sjala/user-reviews:latest
-    docker push $REPO:latest
-    ```
+    docker push $REPO:latest```
 
 **SSH into Docker container**
   - List the containers running on the system:
