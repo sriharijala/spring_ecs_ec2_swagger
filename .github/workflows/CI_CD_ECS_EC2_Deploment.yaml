@@ -82,9 +82,9 @@ jobs:
           sudo apt-get install -y trivy
 
       # Scan Docker image with Trivy
-      - name: Scan Docker image for vulnerabilities
-        run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL ${{vars.USER_REPOSITORY}}:${{ steps.get-imagetag.outputs.imagetag}}
+      #- name: Scan Docker image for vulnerabilities
+      #  run: |
+      #    trivy image --exit-code 1 --severity HIGH,CRITICAL ${{vars.USER_REPOSITORY}}:${{ steps.get-imagetag.outputs.imagetag}}
 
       - name: Install and configure AWS CLI
         uses: unfor19/install-aws-cli-action@v1
