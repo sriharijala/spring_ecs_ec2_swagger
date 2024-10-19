@@ -71,7 +71,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{vars.USER_REPOSITORY}}:${{ steps.get-imagetag.outputs.imagetag}} .
 
-    # Install Trivy
+      # Install Trivy
       - name: Install Trivy
         run: |
           sudo apt-get update
