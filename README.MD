@@ -69,6 +69,7 @@ There are two options for deployment
 **Run Docker commands**
 - Build Docker image               : ``docker build -t sjala/user-reviews:1.0 .``
 - Push docker image to Docker Hub  : ``docker push sjala/user-reviews:1.0``
+- Vulnarability scanning           : `` docker scout quickview``
 - Deploy in docker desktop 		   : ``docker compose --env-file=user-reviews.env up -d --scale user-reviews=3``
 - Docker Desktop shall look like this 
     ![Git Hub variables](images/DockerDesktop.png)

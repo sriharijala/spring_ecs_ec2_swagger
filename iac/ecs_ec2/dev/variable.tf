@@ -18,7 +18,7 @@ variable "project" {
 
 variable "environment" {
   type    = string
-  default = "nonprod"
+  default = "prod"
 }
 
 variable "database_name" {
@@ -47,7 +47,7 @@ variable "inbound_ports" {
 }
 
 variable "user_reviews_image" {
-  type = string
+  type    = string
   default = "307946673854.dkr.ecr.us-east-1.amazonaws.com/sjala/user-reviews:1d0ed90-2024-10-17-01-02"
   #default = "nginxdemos/hello" #working
 }
