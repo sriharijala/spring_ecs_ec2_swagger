@@ -26,7 +26,6 @@ This guide outlines a method for deploying web services within AWS ECS Cluster o
 ### Final outcome
 - Web Service Swagger UI
 ![Web Service Swagger UI](images/FinalUI.png)
-- api-docs - http://server:port/context-path/v3/api-docs.yaml
 - API Document - http://server:port/context-path/v3/api-docs.yaml
 
 **Web Service functionality**
