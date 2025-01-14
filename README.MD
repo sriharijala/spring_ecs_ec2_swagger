@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide outlines a method for deploying web services within AWS ECS Cluster on EC2 instances. The sample service is developed using Spring Boot with JPA, incorporating Swapper for API testing, and utilizing a MySQL database for data storage. Additionally, it leverages GitHub workflows for CI/CD, along with Terraform for AWS resource provisioning and deployment. The purpose of this article is to demonstrate how to integrate these components to deploy a scalable web service im an ECS cluster with EC2 instances.
+This guide outlines a method for deploying web services within AWS ECS Cluster on EC2 instances. The sample service is developed using Spring Boot with JPA, incorporating Swapper for API testing, and utilizing a MySQL database for data storage. Additionally, it leverages GitHub workflows for CI/CD, along with Terraform for AWS resource provisioning and deployment. The purpose of this article is to demonstrate how to integrate these components to deploy a scalable web service in a ECS cluster with EC2 instances.
 
 ### Out of Scope
  - Firewall Setting
